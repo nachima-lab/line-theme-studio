@@ -47,7 +47,7 @@ function renderAssetSlots(){
   const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='image/png,image/jpeg,image/webp,image/heic,image/heif';fileInput.hidden=true;
   fileInput.addEventListener('change',async()=>{
    const file=fileInput.files?.[0];if(!file)return;
-   if(!/^image\\/(png|jpeg|webp|heic|heif)$/.test(file.type)){alert('PNG・JPEG・WebP・HEIC画像を選んでください');fileInput.value='';return;}
+ if(!/^image\/(png|jpeg|webp|heic|heif)$/.test(file.type)){alert('PNG・JPEG・WebP・HEIC画像を選んでください');fileInput.value='';return;}
    const url=URL.createObjectURL(file),img=new Image();
    img.onload=()=>{URL.revokeObjectURL(url);draft.images[slot.id]={name:file.name,blob:file};renderAssetSlots();queueSave();};
    img.onerror=()=>{URL.revokeObjectURL(url);alert('画像を読み込めませんでした。PNGかJPEGをお試しください。');fileInput.value='';};
