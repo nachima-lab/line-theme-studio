@@ -1,69 +1,145 @@
 import {loadSkins,groupedSkins,color} from './skins.js';
 import {renderPreview,renderBackground} from './preview.js';
-import {IMAGE_SLOTS,createDraft,loadProject,saveProject,validateProject,parseBackup} from './store.js';
+import {IMAGE_ACCEPT,IMAGE_SLOTS,createProject,defineCollection,loadCollection,saveCollection,parseLegacyJson} from './store.js';
 import {exportZip,importZip} from './backup-zip.js';
-let draft=createDraft(),skins=[],backgroundUrl=null,saveQueue=Promise.resolve(),storageReady=false;
+import {makeWorkingPreview} from './image-preview.js';
+
+let skins=[],skinIds=[],collection,revision,backgroundUrl;
+let saveQueue=Promise.resolve(),imageQueue=Promise.resolve();
+let dirty=false,busy=false,saveError=null;
 const groupsEl=document.getElementById('skin-groups');
 const assetSlotsEl=document.getElementById('asset-slots');
+const menuSlotsEl=document.getElementById('menu-slots');
 const main=document.querySelector('main');
-const assetViews=new Map();
-const pendingImages=new Map();
-let restoring=false;
+const editors=main.querySelectorAll('.preview-section,.assets-section,.picker-section');
+const assetViews=new Map(),pendingImages=new Map();
 const statusEl=document.getElementById('save-status');
 const input=document.getElementById('background-input');
+const chooseBackground=document.getElementById('choose-background');
 const removeButton=document.getElementById('remove-background');
 const exportButton=document.getElementById('export-backup');
 const importInput=document.getElementById('import-backup');
-function status(message,error=false){statusEl.textContent=message;statusEl.classList.toggle('save-error',error);}
-function queueSave(){
- if(!storageReady){status('自動保存できません。バックアップを利用してください。',true);return;}
- // 保存の順序を保証し、操作時点のデータをスナップショットにする。
- const snapshot={version:1,skinId:draft.skinId,images:{...draft.images}};
- status('保存中…');
- saveQueue=saveQueue.catch(()=>{}).then(()=>saveProject(snapshot)).then(()=>status('自動保存済み')).catch(error=>{status('保存失敗：バックアップを作成してください',true);console.error(error);});
+const chooseBackup=document.getElementById('choose-backup');
+const list=document.getElementById('project-list');
+const newButton=document.getElementById('new-project');
+const renameButton=document.getElementById('rename-project');
+const deleteButton=document.getElementById('delete-project');
+
+function status(message,error=false){
+ statusEl.textContent=message;
+ statusEl.classList.toggle('save-error',error);
 }
+
+function activeProject(){
+ return collection.projects.find(project=>project.id===collection.activeId);
+}
+
+function queueSave(){
+ const snapshot=collection;
+ dirty=true;
+ status('保存中…');
+ saveQueue=saveQueue.then(async()=>{
+  try{
+   revision=await saveCollection(snapshot,revision);
+   if(snapshot===collection){
+    dirty=false;
+    saveError=null;
+    if(!busy)status('自動保存済み');
+   }
+  }catch(error){
+   saveError=error;
+   if(!busy)status('自動保存に失敗しました。'+error.message,true);
+  }
+ });
+}
+
+async function runOperation(message,operation){
+ if(busy||!collection)return;
+ busy=true;
+ main.inert=true;
+ status(message);
+ try{
+  await imageQueue;
+  await saveQueue;
+  const result=await operation();
+  status(result+(saveError?' 自動保存に失敗しました。'+saveError.message:''),Boolean(saveError));
+ }catch(error){
+  const extra=saveError&&saveError!==error?' 自動保存にも失敗しました。'+saveError.message:'';
+  status('操作に失敗しました。'+error.message+extra,true);
+ }finally{
+  busy=false;
+  main.inert=false;
+  list.value=collection.activeId??'';
+ }
+}
+
+async function commitCollection(next){
+ revision=await saveCollection(next,revision);
+ collection=next;
+ dirty=false;
+ saveError=null;
+ renderCollection();
+}
+
+function changeCollection(build){
+ return runOperation('作品を更新中…',async()=>{
+  if(dirty){
+   try{revision=await saveCollection(collection,revision);dirty=false;saveError=null;}
+   catch(error){saveError=error;throw error;}
+  }
+  await commitCollection(build());
+  return '自動保存済み';
+ });
+}
+
+function updateProject(changes){
+ const updated={...activeProject(),...changes};
+ collection=defineCollection(collection.projects.map(project=>project.id===updated.id?updated:project),updated.id);
+ queueSave();
+}
+
 function showBackground(){
- const item=draft.images.talkBackground;
- if(backgroundUrl){URL.revokeObjectURL(backgroundUrl);backgroundUrl=null;}
- if(item){backgroundUrl=URL.createObjectURL(item.blob);renderBackground(backgroundUrl);}
- else renderBackground(null);
+ const item=activeProject()?.images.talkBackground;
+ if(backgroundUrl)URL.revokeObjectURL(backgroundUrl);
+ backgroundUrl=item?URL.createObjectURL(item.preview??item.blob):null;
+ renderBackground(backgroundUrl);
  document.getElementById('background-status').textContent=item?'背景画像：'+item.name:'背景画像：未登録';
+ chooseBackground.textContent=item?'背景画像を差し替える':'背景画像を登録';
  removeButton.hidden=!item;
 }
 
 function setImage(slotId,item){
- draft.images[slotId]=item;
+ const images={...activeProject().images};
+ if(item)images[slotId]=item;
+ else delete images[slotId];
+ updateProject({images});
  if(slotId==='talkBackground')showBackground();
  else renderAssetSlot(slotId);
- queueSave();
 }
 
-async function selectImage(slotId,fileInput){
+function selectImage(slotId,fileInput){
  const file=fileInput.files?.[0];
  fileInput.value='';
- if(!file||restoring)return;
- const request={};
- pendingImages.set(slotId,request);
- try{
-  if(!/^image\/(png|jpeg|webp|heic|heif)$/.test(file.type)){
-   throw new Error('PNG・JPEG・WebP・HEIC画像を選んでください');
-  }
-  const url=URL.createObjectURL(file);
-  try{
-   const image=new Image();
-   image.src=url;
-   await image.decode();
-  }catch{
-   throw new Error('画像を読み込めませんでした。PNGまたはJPEGをお試しください。');
-  }finally{URL.revokeObjectURL(url);}
-  if(!restoring&&pendingImages.get(slotId)===request){
-   setImage(slotId,{name:file.name,blob:file});
-  }
- }catch(error){
-  if(!restoring&&pendingImages.get(slotId)===request)alert(error.message);
- }finally{
-  if(pendingImages.get(slotId)===request)pendingImages.delete(slotId);
+ if(!file||busy||!activeProject())return;
+ if(!IMAGE_ACCEPT.split(',').includes(file.type)){
+  alert('PNG・JPEG・WebP・HEIC画像を選んでください');
+  return;
  }
+ const request={},projectId=collection.activeId;
+ pendingImages.set(slotId,request);
+ const isCurrent=()=>pendingImages.get(slotId)===request&&collection.activeId===projectId;
+ // 大きな画像を同時にデコードしない。
+ imageQueue=imageQueue.then(async()=>{
+  if(!isCurrent())return;
+  try{
+   const preview=await makeWorkingPreview(file);
+   if(isCurrent())setImage(slotId,{name:file.name,blob:file,preview});
+  }catch{
+   if(isCurrent())alert('画像を読み込めませんでした。PNGまたはJPEGをお試しください。');
+  }finally{
+   if(isCurrent())pendingImages.delete(slotId);
+  }
+ });
 }
 
 function removeImage(slotId){
@@ -73,11 +149,13 @@ function removeImage(slotId){
 
 function renderAssetSlot(slotId){
  const view=assetViews.get(slotId);
- const item=draft.images[slotId];
+ const item=activeProject()?.images[slotId];
  if(view.url)URL.revokeObjectURL(view.url);
- view.url=item?URL.createObjectURL(item.blob):null;
+ view.url=item?URL.createObjectURL(item.preview??item.blob):null;
  if(item){
   const image=document.createElement('img');
+  image.loading='lazy';
+  image.decoding='async';
   image.src=view.url;
   image.alt=view.label+'の登録画像';
   image.addEventListener('error',()=>image.replaceWith('プレビューを表示できません'));
@@ -93,14 +171,14 @@ function renderAssetSlot(slotId){
 function initAssetSlots(){
  for(const slot of IMAGE_SLOTS){
   if(slot.id==='talkBackground')continue;
-  const card=document.createElement('article');card.className='asset-card';
+  const card=document.createElement('article');card.className='asset-card';card.dataset.slot=slot.id;
   const heading=document.createElement('h3');heading.textContent=slot.label;
   const preview=document.createElement('div');preview.className='asset-preview';
   const name=document.createElement('p');name.className='asset-filename';name.setAttribute('aria-live','polite');
   const controls=document.createElement('div');controls.className='asset-controls';
 
   const fileInput=document.createElement('input');
-  fileInput.type='file';fileInput.accept=slot.accept;fileInput.hidden=true;
+  fileInput.type='file';fileInput.accept=IMAGE_ACCEPT;fileInput.hidden=true;
   fileInput.addEventListener('change',()=>selectImage(slot.id,fileInput));
   const upload=document.createElement('button');upload.type='button';upload.className='asset-upload';
   upload.addEventListener('click',()=>fileInput.click());
@@ -112,20 +190,21 @@ function initAssetSlots(){
 
   controls.append(upload,fileInput,remove);
   card.append(heading,preview,name,controls);
-  assetSlotsEl.append(card);
+  (slot.id.startsWith('menu-')?menuSlotsEl:assetSlotsEl).append(card);
   assetViews.set(slot.id,{label:slot.label,preview,name,upload,remove,url:null});
-  renderAssetSlot(slot.id);
  }
 }
 
 function chooseSkin(id,save=true){
- const skin=skins.find(s=>s.id===id);if(!skin)return;
- draft.skinId=skin.id;renderPreview(skin);
- groupsEl.querySelectorAll('.skin-tile[aria-pressed="true"]').forEach(el=>el.setAttribute('aria-pressed','false'));
- const selected=Array.from(groupsEl.querySelectorAll('.skin-tile')).find(el=>el.dataset.skinId===id);
- if(selected)selected.setAttribute('aria-pressed','true');
- if(save)queueSave();
+ const skin=skins.find(candidate=>candidate.id===id);
+ if(!skin)return;
+ if(save)updateProject({skinId:id});
+ renderPreview(skin);
+ for(const button of groupsEl.querySelectorAll('.skin-tile')){
+  button.setAttribute('aria-pressed',String(button.dataset.skinId===id));
+ }
 }
+
 function tile(skin){
  const button=document.createElement('button');button.type='button';button.className='skin-tile';button.dataset.skinId=skin.id;button.setAttribute('aria-pressed','false');button.setAttribute('aria-label',skin.displayName+'を選択');
  const sample=document.createElement('div');sample.className='tile-sample';sample.style.backgroundColor=color(skin,'tileSurface');
@@ -134,50 +213,98 @@ function tile(skin){
  sample.append(strip);const label=document.createElement('span');label.className='tile-name';label.textContent=skin.displayName;button.append(sample,label);
  button.addEventListener('click',()=>chooseSkin(skin.id));return button;
 }
+function renderCollection(){
+ list.replaceChildren(...collection.projects.map(project=>new Option(project.name,project.id)));
+ const project=activeProject();
+ list.value=project?.id??'';
+ list.disabled=renameButton.disabled=deleteButton.disabled=!project;
+ document.getElementById('empty-projects').hidden=Boolean(project);
+ for(const section of editors)section.hidden=!project;
+ for(const button of groupsEl.querySelectorAll('.skin-tile'))button.disabled=!project;
+ if(project)chooseSkin(project.skinId,false);
+ showBackground();
+ for(const slotId of assetViews.keys())renderAssetSlot(slotId);
+}
+
 async function init(){
  try{
-  skins=await loadSkins();document.getElementById('skin-count').textContent=skins.length+'種類';
-  for(const {group,skins:items} of groupedSkins(skins)){const section=document.createElement('section');const h=document.createElement('h3');h.className='group-heading';h.textContent=group+' ('+items.length+')';const grid=document.createElement('div');grid.className='tiles';items.forEach(s=>grid.append(tile(s)));section.append(h,grid);groupsEl.append(section);}
-  try{draft=validateProject(await loadProject(),skins.map(s=>s.id));storageReady=true;status('自動保存が有効です');}
-  catch(error){console.error(error);status('自動保存を利用できません。バックアップをご利用ください。',true);}
-  chooseSkin(draft.skinId,false);showBackground();initAssetSlots();
-  input.disabled=false;exportButton.disabled=false;importInput.disabled=false;
- }catch(error){const p=document.getElementById('load-error');p.hidden=false;p.textContent=error.message+'。ページを再読み込みしてください。';status('初期化に失敗しました',true);}
-}
-input.addEventListener('change',()=>selectImage('talkBackground',input));
-removeButton.addEventListener('click',()=>removeImage('talkBackground'));
-exportButton.addEventListener('click',async()=>{
- exportButton.disabled=true;status('バックアップを準備中…');
- try{
-  await saveQueue.catch(()=>{});
-  const blob=await exportZip(draft,skins.map(s=>s.id)),url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='line-theme-studio-backup-'+new Date().toISOString().slice(0,10)+'.zip';document.body.append(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),60000);status('バックアップを作成しました。ファイルを安全な場所に保管してください。');
- }catch(error){status('バックアップ作成失敗：'+error.message,true);}
- finally{exportButton.disabled=false;}
-});
-importInput.addEventListener('change',async()=>{
- const file=importInput.files?.[0];if(!file)return;
- importInput.disabled=true;
- try{
-  const incoming=/\.json$/i.test(file.name)?parseBackup(await file.text(),skins.map(s=>s.id)):await importZip(file,skins.map(s=>s.id));
-  if(!confirm('現在の作品をバックアップの内容で置き換えます。よろしいですか？'))return;
-  // 復元中の操作と、それ以前の画像デコード結果による上書きを防ぐ。
-  restoring=true;
-  main.inert=true;
-  pendingImages.clear();
-  await saveQueue.catch(()=>{});
-  if(!storageReady)throw new Error('保存機能が使えないため、取り込みを中止しました');
-  await saveProject(incoming);
-  draft=incoming;chooseSkin(draft.skinId,false);showBackground();
-  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
-  status('バックアップを復元しました');
- }catch(error){status('読み込み失敗：'+error.message,true);alert('バックアップを読み込めませんでした：'+error.message);}
- finally{
-  restoring=false;
-  main.inert=false;
-  importInput.disabled=false;
-  importInput.value='';
+  skins=await loadSkins();
+  skinIds=skins.map(skin=>skin.id);
+  document.getElementById('skin-count').textContent=skins.length+'種類';
+  for(const {group,skins:items} of groupedSkins(skins)){
+   const section=document.createElement('section');
+   const heading=document.createElement('h3');heading.className='group-heading';heading.textContent=group+' ('+items.length+')';
+   const grid=document.createElement('div');grid.className='tiles';grid.append(...items.map(tile));
+   section.append(heading,grid);groupsEl.append(section);
+  }
+  ({collection,revision}=await loadCollection(skinIds));
+  initAssetSlots();
+  renderCollection();
+  newButton.disabled=exportButton.disabled=chooseBackup.disabled=false;
+  status('自動保存が有効です');
+ }catch(error){
+  const message=document.getElementById('load-error');
+  message.hidden=false;
+  message.textContent='作品を開けませんでした。'+error.message;
+  status('初期化に失敗しました',true);
  }
+}
+
+list.addEventListener('change',()=>{
+ const id=list.value;
+ changeCollection(()=>defineCollection(collection.projects,id));
+});
+newButton.addEventListener('click',()=>{
+ const name=prompt('新しい作品名','作品 '+(collection.projects.length+1))?.trim();
+ if(!name)return;
+ const project=createProject(name);
+ changeCollection(()=>defineCollection([...collection.projects,project],project.id));
+});
+renameButton.addEventListener('click',()=>{
+ const name=prompt('作品名',activeProject().name)?.trim();
+ if(!name||name===activeProject().name)return;
+ changeCollection(()=>defineCollection(collection.projects.map(project=>
+  project.id===collection.activeId?{...project,name}:project),collection.activeId));
+});
+deleteButton.addEventListener('click',()=>{
+ const project=activeProject();
+ if(!confirm('「'+project.name+'」を削除しますか？'))return;
+ changeCollection(()=>{
+  const projects=collection.projects.filter(item=>item.id!==project.id);
+  return defineCollection(projects,projects[0]?.id??null);
+ });
+});
+
+input.accept=IMAGE_ACCEPT;
+chooseBackground.addEventListener('click',()=>input.click());
+input.addEventListener('change',()=>selectImage('talkBackground',input));
+removeButton.addEventListener('click',()=>{removeImage('talkBackground');chooseBackground.focus();});
+exportButton.addEventListener('click',()=>runOperation('全作品ZIPを準備中…',async()=>{
+ const blob=await exportZip(collection,skinIds);
+ const date=new Date(),day=new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,10);
+ const url=URL.createObjectURL(blob);
+ const link=document.createElement('a');
+ link.href=url;link.download='line-theme-studio-backup-'+day+'.zip';
+ document.body.append(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),60000);
+ return '全作品ZIPを作成しました';
+}));
+
+chooseBackup.addEventListener('click',()=>importInput.click());
+importInput.addEventListener('change',()=>{
+ const file=importInput.files?.[0];
+ importInput.value='';
+ if(!file)return;
+ runOperation('バックアップを確認中…',async()=>{
+  const incoming=/\.json$/i.test(file.name)
+   ?{legacy:parseLegacyJson(await file.text(),skinIds)}
+   :await importZip(file,skinIds);
+  const message=incoming.legacy?'旧バックアップを1作品として追加しますか？'
+   :'現在の全作品をバックアップの内容で置き換えますか？';
+  if(!confirm(message))return '復元を中止しました';
+  const next=incoming.collection??defineCollection([...collection.projects,incoming.legacy],incoming.legacy.id);
+  await commitCollection(next);
+  return 'バックアップを復元しました';
+ });
 });
 init();

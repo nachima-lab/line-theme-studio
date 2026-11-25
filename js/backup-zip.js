@@ -1,39 +1,69 @@
-import {IMAGE_SLOTS,validateProject} from './store.js';
+import {COLLECTION_VERSION,IMAGE_SLOTS,LEGACY_SLOT_IDS,convertLegacy,validateCollection} from './store.js';
 import {writeZip,readZip} from './zip.js';
-const FORMAT='line-theme-studio-zip',VERSION=1;
-const mimeToExt={'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/heic':'heic','image/heif':'heif'};
-const extToMime=Object.fromEntries(Object.entries(mimeToExt).map(([type,ext])=>[ext,type]));
-export async function exportZip(project,skinIds){
- const clean=validateProject(project,skinIds),images={},entries=[];
- for(const slot of IMAGE_SLOTS){
-  const item=clean.images[slot.id];
-  if(!item){images[slot.id]=null;continue;}
-  const ext=mimeToExt[item.blob.type];if(!ext)throw new Error('対応していない画像形式です: '+slot.label);
-  const path='images/'+slot.id+'.'+ext;
-  images[slot.id]={path,name:item.name,type:item.blob.type};
-  entries.push({name:path,data:new Uint8Array(await item.blob.arrayBuffer())});
- }
- const meta={format:FORMAT,version:VERSION,exportedAt:new Date().toISOString(),project:{version:1,skinId:clean.skinId,images}};
- entries.unshift({name:'project.json',data:new TextEncoder().encode(JSON.stringify(meta,null,2))});
- return writeZip(entries);
+
+const FORMAT='line-theme-studio-zip';
+const mimeToExt=new Map([
+ ['image/png','png'],['image/jpeg','jpg'],['image/webp','webp'],['image/heic','heic'],['image/heif','heif']
+]);
+const slotIds=IMAGE_SLOTS.map(slot=>slot.id);
+const json=new TextDecoder('utf-8',{fatal:true});
+
+export function exportZip(collection,skinIds){
+ const clean=validateCollection(collection,skinIds),entries=[];
+ const projects=clean.projects.map(({id,name,skinId,images},index)=>{
+  const metadata={};
+  for(const [slotId,item] of Object.entries(images)){
+   const ext=mimeToExt.get(item.blob.type);
+   if(!ext)throw new Error('対応していない画像形式です: '+item.name);
+   const path='images/'+index+'/'+slotId+'.'+ext;
+   metadata[slotId]={path,name:item.name,type:item.blob.type};
+   entries.push({name:path,data:item.blob});
+  }
+  return {id,name,skinId,images:metadata};
+ });
+ const meta={...clean,format:FORMAT,exportedAt:new Date().toISOString(),projects};
+ const manifest=new Blob([JSON.stringify(meta)]);
+ if(manifest.size>1024*1024)throw new Error('作品一覧が大きすぎます');
+ return writeZip([{name:'project.json',data:manifest},...entries]);
 }
-export async function importZip(file,skinIds){
- const entries=await readZip(file),raw=entries.get('project.json');
- if(!raw||raw.length>1024*1024)throw new Error('project.jsonがありません');
- let meta;try{meta=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(raw));}catch{throw new Error('作品設定のJSONが不正です');}
- if(meta?.format!==FORMAT||meta.version!==VERSION)throw new Error('対応していないバックアップです');
- const input=meta.project;if(!input||!input.images||typeof input.images!=='object')throw new Error('作品データが不正です');
- const images={};
- for(const slot of IMAGE_SLOTS){
-  const info=input.images[slot.id];
-  if(info==null){images[slot.id]=null;continue;}
-  if(typeof info.path!=='string'||typeof info.name!=='string'||typeof info.type!=='string')throw new Error('画像情報が不正です');
-  const ext=mimeToExt[info.type];
-  if(!ext||info.path!=='images/'+slot.id+'.'+ext)throw new Error('画像ファイル名が不正です');
-  const data=entries.get(info.path);if(!data)throw new Error('画像ファイルが不足しています: '+slot.label);
-  images[slot.id]={name:info.name,blob:new Blob([data],{type:info.type})};
+
+function restoreImages(images,ids,prefix,entries){
+ if(!images||typeof images!=='object'||Array.isArray(images))throw new Error('画像情報が不正です');
+ const restored=[];
+ for(const [slotId,info] of Object.entries(images)){
+  if(!ids.includes(slotId))throw new Error('不明な画像スロットがあります');
+  if(info===null)continue;
+  const ext=mimeToExt.get(info?.type);
+  if(!ext||typeof info.name!=='string'||info.path!==prefix+slotId+'.'+ext){
+   throw new Error('画像ファイルの情報が不正です');
+  }
+  const data=entries.get(info.path);
+  if(!data)throw new Error('画像ファイルが不足しています: '+info.name);
+  restored.push([slotId,{name:info.name,blob:data.slice(0,data.size,info.type)}]);
+  entries.delete(info.path);
  }
- const expected=new Set(['project.json',...Object.values(input.images).filter(Boolean).map(x=>x.path)]);
- if([...entries.keys()].some(x=>!expected.has(x)))throw new Error('想定外のファイルが含まれています');
- return validateProject({version:1,skinId:input.skinId,images},skinIds);
+ return Object.fromEntries(restored);
+}
+
+export async function importZip(file,skinIds){
+ const entries=await readZip(file);
+ const raw=entries.get('project.json');
+ if(!raw||raw.size>1024*1024)throw new Error('作品設定ファイルがありません、または大きすぎます');
+ let meta;
+ try{meta=JSON.parse(json.decode(await raw.arrayBuffer()));}
+ catch{throw new Error('作品設定のJSONが不正です');}
+ entries.delete('project.json');
+ let result;
+ if(meta?.format!==FORMAT)throw new Error('対応していないバックアップです');
+ if(meta.version===1){
+  const old=meta.project;
+  result={legacy:convertLegacy({...old,version:1,images:restoreImages(old?.images,LEGACY_SLOT_IDS,'images/',entries)},skinIds)};
+ }else if(meta.version===COLLECTION_VERSION&&Array.isArray(meta.projects)){
+  const projects=meta.projects.map((project,index)=>({
+   ...project,images:restoreImages(project?.images,slotIds,'images/'+index+'/',entries)
+  }));
+  result={collection:validateCollection({...meta,projects},skinIds)};
+ }else throw new Error('対応していないバックアップです');
+ if(entries.size)throw new Error('想定外のファイルが含まれています');
+ return result;
 }
