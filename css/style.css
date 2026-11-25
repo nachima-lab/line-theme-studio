@@ -12,3 +12,19 @@
 .import-button{border:1px solid #b8afa4;background:#fff;color:#2c2926}
 .backup-controls button:disabled{opacity:.5;cursor:default}
 .backup-help{font-size:11px;color:#756d65;line-height:1.65;margin:10px 0 0}
+
+/* Phase 3前半：追加画像の管理 */
+.assets-section{grid-column:1/-1;border-top:1px solid #e7e3dd;padding-top:22px}
+.asset-help{font-size:12px;color:#756d65;line-height:1.7;margin:8px 0 14px}
+.asset-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.asset-card{border:1px solid #e2ddd5;border-radius:14px;background:white;padding:14px;min-width:0}
+.asset-card h3{font-size:14px;margin:0 0 10px}
+.asset-preview{height:150px;border-radius:10px;background:#f3f0ec;display:grid;place-items:center;overflow:hidden;color:#8c8176;font-size:12px}
+.asset-preview img{width:100%;height:100%;object-fit:contain}
+.asset-filename{font-size:12px;overflow-wrap:anywhere;min-height:36px;color:#71675d}
+.asset-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.asset-upload,.asset-remove{min-height:44px;border-radius:9px;padding:10px 12px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.asset-upload{background:#292522;color:white}
+.asset-remove{background:white;border:1px solid #cbbeb0;color:#805038}
+@media(max-width:720px){.assets-section{margin-top:30px}.asset-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.asset-preview{height:125px}}
+@media(max-width:390px){.asset-slots{grid-template-columns:1fr}}
