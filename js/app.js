@@ -1,6 +1,7 @@
 import {loadSkins,groupedSkins,color} from './skins.js';
 import {renderPreview,renderBackground} from './preview.js';
-import {createDraft,IMAGE_SLOTS,loadProject,saveProject,validateProject,createBackup,parseBackup} from './store.js';
+import {createDraft,loadProject,saveProject,validateProject,parseBackup} from './store.js';
+import {exportZip,importZip} from './backup-zip.js';
 let draft=createDraft(),skins=[],backgroundUrl=null,saveQueue=Promise.resolve(),storageReady=false;
 const groupsEl=document.getElementById('skin-groups');
 const statusEl=document.getElementById('save-status');
@@ -63,9 +64,8 @@ exportButton.addEventListener('click',async()=>{
  exportButton.disabled=true;status('バックアップを準備中…');
  try{
   await saveQueue.catch(()=>{});
-  const backup=await createBackup(draft,skins.map(s=>s.id));
-  const blob=new Blob([JSON.stringify(backup)],{type:'application/json'}),url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='line-theme-studio-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();
+  const blob=await exportZip(draft,skins.map(s=>s.id)),url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='line-theme-studio-backup-'+new Date().toISOString().slice(0,10)+'.zip';document.body.append(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),60000);status('バックアップを作成しました。ファイルを安全な場所に保管してください。');
  }catch(error){status('バックアップ作成失敗：'+error.message,true);}
  finally{exportButton.disabled=false;}
@@ -73,7 +73,7 @@ exportButton.addEventListener('click',async()=>{
 importInput.addEventListener('change',async()=>{
  const file=importInput.files?.[0];if(!file)return;
  try{
-  const incoming=parseBackup(await file.text(),skins.map(s=>s.id));
+  const incoming=/\.json$/i.test(file.name)?parseBackup(await file.text(),skins.map(s=>s.id)):await importZip(file,skins.map(s=>s.id));
   if(!confirm('現在の作品をバックアップの内容で置き換えます。よろしいですか？'))return;
   // 保存キューを待ってから取り込み、保存が成功してから画面を置換する。
   await saveQueue.catch(()=>{});
