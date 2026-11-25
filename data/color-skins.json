@@ -1,0 +1,2274 @@
+{
+  "version": "full-2026-11-25",
+  "title": "LINE theme color skins - measured color data (unofficial)",
+  "source": "LINE Creators Market color skin screen (theme 5917994), rendered pixels measured 2026-11-25. NOT official published values.",
+  "measuredAt": "2026-11-25",
+  "method": "Tiles and previews are CSS-rendered (no image files). Colors sampled from rendered pixels: tile surface = mode of 3-point 3x3 averages; circles/text = 36x36 region histograms; passcode and talk previews = region histograms of the Android-row preview.",
+  "accuracyLegend": {
+    "official": "Published by LINE (none in this file)",
+    "sampled": "Measured from rendered pixels of the official screen; may differ from true CSS values by a few RGB steps",
+    "estimated": "Guessed (none in this file)",
+    "null": "Not acquired"
+  },
+  "findings": [
+    "CORRECTION to the trial assumption: the tile surface color is NOT the header color in most skins. The actual talk-room header band matches the tile's lower strip color, so 'header' in this file holds the strip color (cross-checked against talk previews for at least one skin per group, and bubble colors matched tile circles in all 50 skins). 'tileSurface' is kept separately because the app may want it for skin-picker tiles.",
+    "Bubble correspondence holds for all 50 skins: left circle = otherBubble, right circle = ownBubble, 'T' letter color = text color on that bubble.",
+    "Passcode backgrounds often reuse the surface/strip/own-bubble colors but sometimes are independent colors; all values here are individually measured, not derived.",
+    "Talk-room background color is a theme-side setting, not a skin property, so it is intentionally not part of skin colors.",
+    "Menu (bottom tab bar) color was not acquired; null means not acquired.",
+    "Per-platform rendering differences (iOS 26 liquid glass / legacy iOS / Android) are not verified; treat OS-specific rendering as a separate layer from this shared color data."
+  ],
+  "usageNote": "Measured numeric data only; no official images or templates are included. Treat as a private reference for the user's own app; do not claim these are official LINE values.",
+  "skins": [
+    {
+      "id": "bw_01",
+      "displayName": "B/W 01",
+      "group": "B/W",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#F8F8F9",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#EDEFF3",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#D5E0F4",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#282828",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#282828",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "bw_02",
+      "displayName": "B/W 02",
+      "group": "B/W",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#262626",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#262626",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#383838",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#111111",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#353535",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#353535",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "bw_03",
+      "displayName": "B/W 03",
+      "group": "B/W",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#DDDDDD",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#505050",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#505050",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#E8E8E8",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "bw_04",
+      "displayName": "B/W 04",
+      "group": "B/W",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#C5DDEF",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#35556D",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#35556D",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#1175BD",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "bw_05",
+      "displayName": "B/W 05",
+      "group": "B/W",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#2B2B2B",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "beige_01",
+      "displayName": "Beige 01",
+      "group": "Beige",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#EDE6DE",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F7F3EF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#EFCAB6",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#615956",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#5D4E48",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#F7F3EF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#EDE6DE",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "beige_02",
+      "displayName": "Beige 02",
+      "group": "Beige",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#D8B18F",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFEF6",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFDA59",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#5E5145",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#5E5145",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFFEF6",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#D5AD8A",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "beige_03",
+      "displayName": "Beige 03",
+      "group": "Beige",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#F1EAD9",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FAF3E3",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#E4DAC4",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#1A1A1A",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#1A1A1A",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FAE9BD",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#D04344",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "beige_04",
+      "displayName": "Beige 04",
+      "group": "Beige",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#7CC9CA",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FEFAEF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#775744",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#775744",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FEFAEF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#85CCCC",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "beige_05",
+      "displayName": "Beige 05",
+      "group": "Beige",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#263C60",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F5EAD0",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FEF9EC",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#EBD49B",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#6A3C1F",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#6A3C1F",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#F5EAD0",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#2E4264",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "blue_01",
+      "displayName": "Blue 01",
+      "group": "Blue",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#6CAFE7",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#77B8ED",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFF001",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#063158",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#063158",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#6CAFE7",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#6CAFE7",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "blue_02",
+      "displayName": "Blue 02",
+      "group": "Blue",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#0099CC",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#D8EDF4",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFF600",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#0099CC",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "blue_03",
+      "displayName": "Blue 03",
+      "group": "Blue",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#81D2F0",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F1FCFF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#9CD9F0",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#1C464F",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#1C464F",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#81D2F0",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FAFEFF",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "blue_04",
+      "displayName": "Blue 04",
+      "group": "Blue",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#2EBCEE",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#E5F7FF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#81CC71",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#4E4E4E",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#222222",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#E5F7FF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#2EBCEE",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "blue_05",
+      "displayName": "Blue 05",
+      "group": "Blue",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#78BBEC",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#3D3B3B",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#AFDAFA",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#1F3450",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#1F3450",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#CDE8FA",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#56AFE7",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "brown_01",
+      "displayName": "Brown 01",
+      "group": "Brown",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#422B21",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#5C3E30",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFD93B",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#24120B",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#24120B",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#422B21",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#5C3E30",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "brown_02",
+      "displayName": "Brown 02",
+      "group": "Brown",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#6B4839",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F2EDE6",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#E5D5C2",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#282828",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#444444",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#E2D9D0",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#F1ECE5",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "brown_03",
+      "displayName": "Brown 03",
+      "group": "Brown",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#8D6947",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F5F3F0",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFE3D3",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#141414",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#141414",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#E5E0D8",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#504233",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "brown_04",
+      "displayName": "Brown 04",
+      "group": "Brown",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#CE8B3D",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFF3E1",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#E8A34A",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#331708",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#331708",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFF3E1",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#CE8B3D",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "brown_05",
+      "displayName": "Brown 05",
+      "group": "Brown",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#C37125",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FCF4E1",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#DC9859",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#553930",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#553930",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#C37225",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FCF6E8",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_01",
+      "displayName": "Green 01",
+      "group": "Green",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#6EC36E",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F2F2E6",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#8ADA8A",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#282828",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#0C542D",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FEFEF0",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#6EC36E",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_02",
+      "displayName": "Green 02",
+      "group": "Green",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#F4F4F4",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#71E393",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#282828",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#F9F9F9",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#1FB86D",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_03",
+      "displayName": "Green 03",
+      "group": "Green",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#F4F7E9",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F4F7E9",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#A9CD41",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FAFCF2",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#EFF3E2",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_04",
+      "displayName": "Green 04",
+      "group": "Green",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFEA77",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#52644B",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#52644B",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#C3DF8D",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_05",
+      "displayName": "Green 05",
+      "group": "Green",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#9FDFC6",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F7FFFB",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#9FDFC6",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#374A43",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#374A43",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#EDFDF8",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#9FDFC6",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_06",
+      "displayName": "Green 06",
+      "group": "Green",
+      "index": 6,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#7BD0DF",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#8ED6E3",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFF001",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#10576C",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#10576C",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#7BD0DF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#7BD0DF",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_07",
+      "displayName": "Green 07",
+      "group": "Green",
+      "index": 7,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#95CBCD",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FDFCF4",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#F9CEBD",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#282828",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#141414",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FDFBEF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#80C1C3",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_08",
+      "displayName": "Green 08",
+      "group": "Green",
+      "index": 8,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#84DAD0",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F6FFFE",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#A0E1D9",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#325552",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#325552",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#84DAD0",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#F6FFFE",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_09",
+      "displayName": "Green 09",
+      "group": "Green",
+      "index": 9,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#BAE4EC",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#DFF5F5",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#F3FDFD",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#BAE4EC",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#303A3A",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#303A3A",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#DFF5F5",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#90C419",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "green_10",
+      "displayName": "Green 10",
+      "group": "Green",
+      "index": 10,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#4FC4BF",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#DCF1F1",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#7CD2CD",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#3A5655",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#092C2B",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#D2E5E5",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#7CD2CD",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "pink_01",
+      "displayName": "Pink 01",
+      "group": "Pink",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#F87FA9",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFF4F8",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFDCE9",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#282828",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#444444",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FB8CB5",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFE0EC",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "pink_02",
+      "displayName": "Pink 02",
+      "group": "Pink",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFD2D5",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFEBE4",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFCBCD",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#89464C",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#89464C",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFEBE4",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFD2D5",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "pink_03",
+      "displayName": "Pink 03",
+      "group": "Pink",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFD2DC",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFF3F4",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFD2DC",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#000000",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFD2DC",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFF3F3",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "pink_04",
+      "displayName": "Pink 04",
+      "group": "Pink",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFADC0",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFF8FA",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFADC0",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#505050",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#941F3C",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFADC0",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFEEF2",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "pink_05",
+      "displayName": "Pink 05",
+      "group": "Pink",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFE1E8",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFF4F6",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#EBB0BE",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#523C41",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#523C41",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#EBB0BE",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFF4F6",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "purple_01",
+      "displayName": "Purple 01",
+      "group": "Purple",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#AF7FF0",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#B788F6",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFF001",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#391A67",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#391A67",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#AF7FF0",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#AF7FF0",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "purple_02",
+      "displayName": "Purple 02",
+      "group": "Purple",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#D1ACE6",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FAF8FD",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#EDDBF5",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#564C5B",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#564C5B",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#F6EDFA",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#D1ACE6",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "purple_03",
+      "displayName": "Purple 03",
+      "group": "Purple",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#F0E4F1",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F9F5F9",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#EDD9EC",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#6A3C69",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#6A3C69",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#F5EEF6",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#E6D0E3",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "purple_04",
+      "displayName": "Purple 04",
+      "group": "Purple",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#CDBFE3",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F3F2FE",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#DBC9E8",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#5C5C5C",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#555157",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#F6F4FD",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#CDBFE3",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "purple_05",
+      "displayName": "Purple 05",
+      "group": "Purple",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#7F5A8F",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#D5C5DB",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#492E59",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#492E59",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#E7DFEB",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#492E59",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "red_01",
+      "displayName": "Red 01",
+      "group": "Red",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#F78F8D",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F89E9C",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFEB6B",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#3D1818",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#3D1818",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#F78F8D",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#F78F8D",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "red_02",
+      "displayName": "Red 02",
+      "group": "Red",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#EA4422",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#F9EFEA",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#EFD8C9",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#673E26",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#673E26",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#F9EFEA",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#E53B1F",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "red_03",
+      "displayName": "Red 03",
+      "group": "Red",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#E8424D",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFB0B6",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#76211D",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#76211D",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#E8424D",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "red_04",
+      "displayName": "Red 04",
+      "group": "Red",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#EA4138",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FBF1E6",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#F3DBA2",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#383838",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#36342F",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FBF1E6",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#EA4138",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "red_05",
+      "displayName": "Red 05",
+      "group": "Red",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#F1704B",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FAF2E0",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FC9679",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#482729",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#482729",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFF7E5",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFD21A",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "yellow_01",
+      "displayName": "Yellow 01",
+      "group": "Yellow",
+      "index": 1,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FCE06D",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FCE06D",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#F69A88",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#3C2509",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#3C2509",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FCE06D",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FCE06D",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "yellow_02",
+      "displayName": "Yellow 02",
+      "group": "Yellow",
+      "index": 2,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFE248",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFDE7",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFE248",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#775F4A",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#775F4A",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#75B352",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFE458",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "yellow_03",
+      "displayName": "Yellow 03",
+      "group": "Yellow",
+      "index": 3,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#F4B83E",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFFF7",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFC948",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#492B0E",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#492B0E",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFC948",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "yellow_04",
+      "displayName": "Yellow 04",
+      "group": "Yellow",
+      "index": 4,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFE16A",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FEFAEB",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFDA47",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#633600",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#633600",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FEFAEB",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFE16A",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    },
+    {
+      "id": "yellow_05",
+      "displayName": "Yellow 05",
+      "group": "Yellow",
+      "index": 5,
+      "measuredAt": "2026-11-25",
+      "colors": {
+        "header": {
+          "value": "#FFF4A9",
+          "accuracy": "sampled"
+        },
+        "tileSurface": {
+          "value": "#FFFAD7",
+          "accuracy": "sampled"
+        },
+        "otherBubble": {
+          "value": "#FFFFFF",
+          "accuracy": "sampled"
+        },
+        "ownBubble": {
+          "value": "#FFEB90",
+          "accuracy": "sampled"
+        },
+        "textOnOtherBubble": {
+          "value": "#45171B",
+          "accuracy": "sampled"
+        },
+        "textOnOwnBubble": {
+          "value": "#45171B",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundUpper": {
+          "value": "#FFFAD7",
+          "accuracy": "sampled"
+        },
+        "passcodeBackgroundKeypad": {
+          "value": "#FFF4A9",
+          "accuracy": "sampled"
+        },
+        "menu": {
+          "value": null,
+          "accuracy": null
+        }
+      }
+    }
+  ]
+}
