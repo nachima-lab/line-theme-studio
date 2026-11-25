@@ -1,8 +1,9 @@
 // 保存層。将来の画像スロット追加時もここに集約する。
+const IMAGE_ACCEPT='image/png,image/jpeg,image/webp,image/heic,image/heif';
 export const IMAGE_SLOTS=[
- {id:'talkBackground',label:'トーク背景',accept:'image/*'},
- {id:'mainImage',label:'メイン画像（仮登録）',accept:'image/*'},
- {id:'menuIcon',label:'メニューアイコン（仮登録）',accept:'image/*'}
+ {id:'talkBackground',label:'トーク背景',accept:IMAGE_ACCEPT},
+ {id:'mainImage',label:'メイン画像（仮登録）',accept:IMAGE_ACCEPT},
+ {id:'menuIcon',label:'メニューアイコン（仮登録）',accept:IMAGE_ACCEPT}
 ];
 export const BACKUP_FORMAT='line-theme-studio-backup';
 export const BACKUP_VERSION=1;

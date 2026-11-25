@@ -5,7 +5,10 @@ import {exportZip,importZip} from './backup-zip.js';
 let draft=createDraft(),skins=[],backgroundUrl=null,saveQueue=Promise.resolve(),storageReady=false;
 const groupsEl=document.getElementById('skin-groups');
 const assetSlotsEl=document.getElementById('asset-slots');
-const assetUrls=new Map();
+const main=document.querySelector('main');
+const assetViews=new Map();
+const pendingImages=new Map();
+let restoring=false;
 const statusEl=document.getElementById('save-status');
 const input=document.getElementById('background-input');
 const removeButton=document.getElementById('remove-background');
@@ -28,38 +31,90 @@ function showBackground(){
  removeButton.hidden=!item;
 }
 
-function renderAssetSlots(){
- if(!assetSlotsEl)return;
- for(const url of assetUrls.values())URL.revokeObjectURL(url);
- assetUrls.clear();assetSlotsEl.replaceChildren();
- for(const slot of IMAGE_SLOTS.filter(x=>x.id!=='talkBackground')){
-  const item=draft.images[slot.id]??null;
+function setImage(slotId,item){
+ draft.images[slotId]=item;
+ if(slotId==='talkBackground')showBackground();
+ else renderAssetSlot(slotId);
+ queueSave();
+}
+
+async function selectImage(slotId,fileInput){
+ const file=fileInput.files?.[0];
+ fileInput.value='';
+ if(!file||restoring)return;
+ const request={};
+ pendingImages.set(slotId,request);
+ try{
+  if(!/^image\/(png|jpeg|webp|heic|heif)$/.test(file.type)){
+   throw new Error('PNG・JPEG・WebP・HEIC画像を選んでください');
+  }
+  const url=URL.createObjectURL(file);
+  try{
+   const image=new Image();
+   image.src=url;
+   await image.decode();
+  }catch{
+   throw new Error('画像を読み込めませんでした。PNGまたはJPEGをお試しください。');
+  }finally{URL.revokeObjectURL(url);}
+  if(!restoring&&pendingImages.get(slotId)===request){
+   setImage(slotId,{name:file.name,blob:file});
+  }
+ }catch(error){
+  if(!restoring&&pendingImages.get(slotId)===request)alert(error.message);
+ }finally{
+  if(pendingImages.get(slotId)===request)pendingImages.delete(slotId);
+ }
+}
+
+function removeImage(slotId){
+ pendingImages.delete(slotId);
+ setImage(slotId,null);
+}
+
+function renderAssetSlot(slotId){
+ const view=assetViews.get(slotId);
+ const item=draft.images[slotId];
+ if(view.url)URL.revokeObjectURL(view.url);
+ view.url=item?URL.createObjectURL(item.blob):null;
+ if(item){
+  const image=document.createElement('img');
+  image.src=view.url;
+  image.alt=view.label+'の登録画像';
+  image.addEventListener('error',()=>image.replaceWith('プレビューを表示できません'));
+  view.preview.replaceChildren(image);
+ }else view.preview.textContent='画像未登録';
+ view.name.textContent=item?.name??'';
+ const action=item?'画像を差し替える':'画像を登録する';
+ view.upload.textContent=action;
+ view.upload.setAttribute('aria-label',view.label+'の'+action);
+ view.remove.hidden=!item;
+}
+
+function initAssetSlots(){
+ for(const slot of IMAGE_SLOTS){
+  if(slot.id==='talkBackground')continue;
   const card=document.createElement('article');card.className='asset-card';
   const heading=document.createElement('h3');heading.textContent=slot.label;
   const preview=document.createElement('div');preview.className='asset-preview';
-  if(item){
-   const url=URL.createObjectURL(item.blob);assetUrls.set(slot.id,url);
-   const image=document.createElement('img');image.src=url;image.alt=slot.label+'の登録画像';preview.append(image);
-  }else preview.textContent='画像未登録';
-  const name=document.createElement('p');name.className='asset-filename';name.textContent=item?item.name:'まだ画像がありません';
+  const name=document.createElement('p');name.className='asset-filename';name.setAttribute('aria-live','polite');
   const controls=document.createElement('div');controls.className='asset-controls';
-  const label=document.createElement('label');label.className='asset-upload';label.textContent=item?'画像を差し替える':'画像を登録する';
-  const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='image/png,image/jpeg,image/webp,image/heic,image/heif';fileInput.hidden=true;
-  fileInput.addEventListener('change',async()=>{
-   const file=fileInput.files?.[0];if(!file)return;
- if(!/^image\/(png|jpeg|webp|heic|heif)$/.test(file.type)){alert('PNG・JPEG・WebP・HEIC画像を選んでください');fileInput.value='';return;}
-   const url=URL.createObjectURL(file),img=new Image();
-   img.onload=()=>{URL.revokeObjectURL(url);draft.images[slot.id]={name:file.name,blob:file};renderAssetSlots();queueSave();};
-   img.onerror=()=>{URL.revokeObjectURL(url);alert('画像を読み込めませんでした。PNGかJPEGをお試しください。');fileInput.value='';};
-   img.src=url;
-  });
-  label.append(fileInput);controls.append(label);
-  if(item){
-   const remove=document.createElement('button');remove.type='button';remove.className='asset-remove';remove.textContent='画像を外す';
-   remove.addEventListener('click',()=>{draft.images[slot.id]=null;renderAssetSlots();queueSave();});
-   controls.append(remove);
-  }
-  card.append(heading,preview,name,controls);assetSlotsEl.append(card);
+
+  const fileInput=document.createElement('input');
+  fileInput.type='file';fileInput.accept=slot.accept;fileInput.hidden=true;
+  fileInput.addEventListener('change',()=>selectImage(slot.id,fileInput));
+  const upload=document.createElement('button');upload.type='button';upload.className='asset-upload';
+  upload.addEventListener('click',()=>fileInput.click());
+
+  const remove=document.createElement('button');remove.type='button';remove.className='asset-remove';
+  remove.textContent='画像を外す';
+  remove.setAttribute('aria-label',slot.label+'の画像を外す');
+  remove.addEventListener('click',()=>{removeImage(slot.id);upload.focus();});
+
+  controls.append(upload,fileInput,remove);
+  card.append(heading,preview,name,controls);
+  assetSlotsEl.append(card);
+  assetViews.set(slot.id,{label:slot.label,preview,name,upload,remove,url:null});
+  renderAssetSlot(slot.id);
  }
 }
 
@@ -85,19 +140,12 @@ async function init(){
   for(const {group,skins:items} of groupedSkins(skins)){const section=document.createElement('section');const h=document.createElement('h3');h.className='group-heading';h.textContent=group+' ('+items.length+')';const grid=document.createElement('div');grid.className='tiles';items.forEach(s=>grid.append(tile(s)));section.append(h,grid);groupsEl.append(section);}
   try{draft=validateProject(await loadProject(),skins.map(s=>s.id));storageReady=true;status('自動保存が有効です');}
   catch(error){console.error(error);status('自動保存を利用できません。バックアップをご利用ください。',true);}
-  chooseSkin(draft.skinId,false);showBackground();renderAssetSlots();
+  chooseSkin(draft.skinId,false);showBackground();initAssetSlots();
   input.disabled=false;exportButton.disabled=false;importInput.disabled=false;
  }catch(error){const p=document.getElementById('load-error');p.hidden=false;p.textContent=error.message+'。ページを再読み込みしてください。';status('初期化に失敗しました',true);}
 }
-input.addEventListener('change',()=>{
- const file=input.files?.[0];if(!file)return;
- if(!/^image\/(png|jpeg|webp|heic|heif)$/.test(file.type)){alert('PNG・JPEG・WebP・HEIC画像を選んでください');input.value='';return;}
- const url=URL.createObjectURL(file),img=new Image();
- img.onload=()=>{URL.revokeObjectURL(url);draft.images.talkBackground={name:file.name,blob:file};showBackground();queueSave();input.value='';};
- img.onerror=()=>{URL.revokeObjectURL(url);alert('画像を読み込めませんでした。PNGまたはJPEGをお試しください。');input.value='';};
- img.src=url;
-});
-removeButton.addEventListener('click',()=>{draft.images.talkBackground=null;showBackground();input.value='';queueSave();});
+input.addEventListener('change',()=>selectImage('talkBackground',input));
+removeButton.addEventListener('click',()=>removeImage('talkBackground'));
 exportButton.addEventListener('click',async()=>{
  exportButton.disabled=true;status('バックアップを準備中…');
  try{
@@ -110,15 +158,26 @@ exportButton.addEventListener('click',async()=>{
 });
 importInput.addEventListener('change',async()=>{
  const file=importInput.files?.[0];if(!file)return;
+ importInput.disabled=true;
  try{
   const incoming=/\.json$/i.test(file.name)?parseBackup(await file.text(),skins.map(s=>s.id)):await importZip(file,skins.map(s=>s.id));
   if(!confirm('現在の作品をバックアップの内容で置き換えます。よろしいですか？'))return;
-  // 保存キューを待ってから取り込み、保存が成功してから画面を置換する。
+  // 復元中の操作と、それ以前の画像デコード結果による上書きを防ぐ。
+  restoring=true;
+  main.inert=true;
+  pendingImages.clear();
   await saveQueue.catch(()=>{});
   if(!storageReady)throw new Error('保存機能が使えないため、取り込みを中止しました');
   await saveProject(incoming);
-  draft=incoming;chooseSkin(draft.skinId,false);showBackground();renderAssetSlots();status('バックアップを復元しました');
+  draft=incoming;chooseSkin(draft.skinId,false);showBackground();
+  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
+  status('バックアップを復元しました');
  }catch(error){status('読み込み失敗：'+error.message,true);alert('バックアップを読み込めませんでした：'+error.message);}
- finally{importInput.value='';}
+ finally{
+  restoring=false;
+  main.inert=false;
+  importInput.disabled=false;
+  importInput.value='';
+ }
 });
 init();
