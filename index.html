@@ -19,7 +19,7 @@
    <button type="button" id="choose-backup" disabled>バックアップを読み込む</button>
    <input id="import-backup" type="file" accept=".zip,.json,application/zip,application/json" hidden>
   </div>
-  <p class="backup-help">作品はこのブラウザに自動保存されます。全作品ZIPの読み込みは作品一覧を置き換えます。旧ZIPと旧JSONは1作品として追加します。</p>
+  <div id="backup-omissions" hidden><p>ZIPに収録できなかった画像があります。</p><ul></ul></div><p class="backup-help">作品はこのブラウザに自動保存されます。全作品ZIPの読み込みは作品一覧を置き換えます。旧ZIPと旧JSONは1作品として追加します。</p>
  </div>
  <p id="load-error" class="error" role="alert" hidden></p>
 </section>

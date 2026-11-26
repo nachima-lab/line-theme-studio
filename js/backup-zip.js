@@ -11,38 +11,67 @@ const slotIds=IMAGE_SLOTS.map(slot=>slot.id);
 const slotLabels=new Map(IMAGE_SLOTS.map(({id,label})=>[id,label]));
 const json=new TextDecoder('utf-8',{fatal:true});
 
-export async function exportZip(collection,skinIds){
- const clean=validateCollection(collection,skinIds),entries=[];
- function pack(item,base,label){
-  const ext=mimeToExt.get(item.blob.type);
-  if(!ext)throw new Error(label+'：対応していない画像形式です（'+item.name+'）');
-  const path=base+'.'+ext;
-  entries.push({name:path,data:item.blob,label});
-  return {path,name:item.name,type:item.blob.type};
+export async function exportZip(collection,skinIds,{omitted=[]}={}){
+ const clean=validateCollection(collection,skinIds),entries=[],projects=[];
+ function omit(label,item,reason){
+  omitted.push(label+'（'+item.name+'）：'+reason);
  }
- function packSlots(images,prefix,projectName,suffix=''){
-  return Object.fromEntries(Object.entries(images).map(([slot,item])=>[
-   slot,pack(item,prefix+slot,'「'+projectName+'」の'+slotLabels.get(slot)+suffix)
-  ]));
+ function pack(blob,name,base){
+  const path=base+'.'+mimeToExt.get(blob.type);
+  entries.push({name:path,data:blob});
+  return {path,name,type:blob.type};
  }
- const projects=clean.projects.map(({id,name,skinId,images,exportSettings,production},index)=>({
-  id,name,skinId,exportSettings,images:packSlots(images,'images/'+index+'/',name),
-  production:{...production,
-   characterSheet:production.characterSheet?pack(production.characterSheet,'references/'+index+'/character-sheet','「'+name+'」のキャラ表'):null,
-   undo:packSlots(production.undo,'undo/'+index+'/',name,'（取り消し用）')}
- }));
+ async function readable(item,label){
+  try{
+   const {blob}=item;
+   if(!blob.size)throw new Error('画像データが0バイトです');
+   if(!mimeToExt.has(blob.type))throw new Error('対応していない画像形式です');
+   let bytes;
+   try{bytes=await blob.arrayBuffer();}
+   catch{throw new Error('画像データを読み取れません');}
+   if(bytes.byteLength!==blob.size)throw new Error('実際のバイト数が申告サイズと一致しません');
+   if(!matchesImageMime(bytes,blob.type))throw new Error('画像形式が記録されたMIMEタイプと一致しません');
+   const copy=new Blob([bytes],{type:blob.type});
+   try{await verifyOriginal(copy);}
+   catch{throw new Error('画像をデコードできません');}
+   return copy;
+  }catch(error){
+   omit(label,item,error.message);
+   return null;
+  }
+ }
+ for(const [index,{id,name,skinId,images,exportSettings,production}] of clean.projects.entries()){
+  const packed={},undo={};
+  for(const [slot,item] of Object.entries(images)){
+   const label='「'+name+'」の'+slotLabels.get(slot);
+   const original=await readable(item,label);
+   const previous=production.undo[slot];
+   const previousBlob=previous?await readable(previous,label+'（取り消し用）'):null;
+   const imagePath='images/'+index+'/'+slot;
+   if(original){
+    packed[slot]=pack(original,item.name,imagePath);
+    if(previousBlob)undo[slot]=pack(previousBlob,previous.name,'undo/'+index+'/'+slot);
+   }else if(previousBlob){
+    packed[slot]=pack(previousBlob,previous.name,imagePath);
+    omitted.push(label+'：ZIPには読み取れた透過処理前の画像を収録しました');
+   }
+  }
+  const sheet=production.characterSheet;
+  const sheetBlob=sheet?await readable(sheet,'「'+name+'」のキャラ表'):null;
+  projects.push({id,name,skinId,exportSettings,images:packed,production:{...production,undo,
+   characterSheet:sheetBlob?pack(sheetBlob,sheet.name,'references/'+index+'/character-sheet'):null}});
+ }
  const meta={...clean,version:BACKUP_VERSION,format:FORMAT,exportedAt:new Date().toISOString(),projects};
+ if(omitted.length)meta.omittedImages=omitted;
  const manifest=new Blob([JSON.stringify(meta)]);
  if(manifest.size>1024*1024)throw new Error('作品一覧が大きすぎます');
- const checked=new Set();
- for(const {data,label} of entries){
-  if(checked.has(data))continue;
-  if(!data.size)throw new Error(label+'：原画データが0バイトです');
-  try{await verifyOriginal(data);}
-  catch{throw new Error(label+'：原画データを読み取れないか、画像形式を解釈できません');}
-  checked.add(data);
- }
  return writeZip([{name:'project.json',data:manifest},...entries]);
+}
+
+function matchesImageMime(bytes,type){
+ const detected=detectImageMime(new Uint8Array(bytes));
+ // image/heif は HEVC を含む HEIF コンテナでも使われる。
+ return detected===type||(detected==='image/heic'&&type==='image/heif');
 }
 
 async function restoreImage(info,base,entries,file,label){
@@ -54,9 +83,7 @@ async function restoreImage(info,base,entries,file,label){
   const entry=entries.get(info.path);
   if(!entry)throw new Error('画像ファイルが不足しています（'+info.name+'）');
   const bytes=await readZipEntryBytes(file,entry);
-  const detected=detectImageMime(new Uint8Array(bytes));
-  // image/heif は HEVC を含む HEIF コンテナでも使われる。
-  if(detected!==info.type&&!(detected==='image/heic'&&info.type==='image/heif')){
+  if(!matchesImageMime(bytes,info.type)){
    throw new Error('画像の実形式が記録されたMIMEタイプと一致しません（'+info.name+'）');
   }
   const blob=new Blob([bytes],{type:info.type});
@@ -115,5 +142,8 @@ export async function importZip(file,skinIds){
   result={collection:validateCollection({...meta,version:COLLECTION_VERSION,projects},skinIds)};
  }else throw new Error('対応していないバックアップです');
  if(entries.size)throw new Error('想定外のファイルが含まれています');
+ if(meta.version===BACKUP_VERSION&&Array.isArray(meta.omittedImages)&&meta.omittedImages.length){
+  result.partial=true;
+ }
  return result;
 }

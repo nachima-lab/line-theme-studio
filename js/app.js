@@ -325,14 +325,25 @@ chooseBackground.addEventListener('click',()=>input.click());
 input.addEventListener('change',()=>selectImage('talkBackground',input));
 removeButton.addEventListener('click',()=>{removeImage('talkBackground');chooseBackground.focus();});
 exportButton.addEventListener('click',()=>runOperation('全作品ZIPを準備中…',async()=>{
- const blob=await exportZip(collection,skinIds);
+ const omissions=document.getElementById('backup-omissions');
+ omissions.hidden=true;
+ const omitted=[];
+ const blob=await exportZip(collection,skinIds,{omitted});
+ if(omitted.length){
+  omissions.querySelector('ul').replaceChildren(...omitted.map(text=>{
+   const item=document.createElement('li');
+   item.textContent=text;
+   return item;
+  }));
+  omissions.hidden=false;
+ }
  const date=new Date(),day=new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,10);
  const url=URL.createObjectURL(blob);
  const link=document.createElement('a');
- link.href=url;link.download='line-theme-studio-backup-'+day+'.zip';
+ link.href=url;link.download='line-theme-studio-backup-'+day+(omitted.length?'-partial':'')+'.zip';
  document.body.append(link);link.click();link.remove();
  setTimeout(()=>URL.revokeObjectURL(url),60000);
- return '全作品ZIPを作成しました';
+ return omitted.length?'読み取れたデータのZIPを作成しました。未収録の画像は一覧を確認してください。':'全作品ZIPを作成しました';
 }));
 
 chooseBackup.addEventListener('click',()=>importInput.click());
@@ -346,7 +357,7 @@ importInput.addEventListener('change',()=>{
    :await importZip(file,skinIds);
   const message=incoming.legacy?'旧バックアップを1作品として追加しますか？'
    :'現在の全作品をバックアップの内容で置き換えますか？';
-  if(!confirm(message))return '復元を中止しました';
+  if(!confirm((incoming.partial?'このZIPには収録できなかった画像があります。\n':'')+message))return '復元を中止しました';
   const next=incoming.collection??defineCollection([...collection.projects,incoming.legacy],incoming.legacy.id);
   await commitCollection(next);
   return 'バックアップを復元しました';
