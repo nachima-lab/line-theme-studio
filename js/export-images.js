@@ -1,5 +1,6 @@
 import {adjustment,cropBounds,PNG_LIMIT} from './export-spec.js';
 import {indexedPng} from './indexed-png.js';
+import {loadDecodedImage,loadImageFromCopy} from './image-preview.js';
 
 function canvas(width,height){
  const element=document.createElement('canvas');
@@ -14,26 +15,25 @@ function release(context){
  context.canvas.width=context.canvas.height=1;
 }
 
-async function withImage(blob,work){
- const url=URL.createObjectURL(blob),image=new Image();
- try{
-  image.src=url;
-  await image.decode();
-  return await work(image);
- }finally{
-  image.removeAttribute('src');
-  URL.revokeObjectURL(url);
+async function withImage(blob,work,{retry=false}={}){
+ let decoded;
+ try{decoded=await loadDecodedImage(blob);}
+ catch(error){
+  if(!retry)throw error;
+  decoded=await loadImageFromCopy(blob);
  }
+ try{return await work(decoded.image);}
+ finally{decoded.dispose();}
 }
 
-async function originalPixels(blob){
+async function originalPixels(blob,options){
  return withImage(blob,image=>{
   const context=canvas(image.naturalWidth,image.naturalHeight);
   try{
    context.drawImage(image,0,0);
    return context.getImageData(0,0,image.naturalWidth,image.naturalHeight);
   }finally{release(context);}
- });
+ },options);
 }
 
 function sinc(x){
@@ -186,7 +186,7 @@ function encode(context){
 }
 
 export async function editOriginal(blob,edit){
- const pixels=await originalPixels(blob);
+ const pixels=await originalPixels(blob,{retry:true});
  edit(pixels);
  const context=canvas(pixels.width,pixels.height);
  try{

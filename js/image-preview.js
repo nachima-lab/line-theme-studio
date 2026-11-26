@@ -58,3 +58,40 @@ export async function verifyOriginal(blob){
   if(url)URL.revokeObjectURL(url);
  }
 }
+
+// 呼び出し元が描画を終えるまで、デコード済み画像とURLを保持する。
+export async function loadDecodedImage(blob){
+ const image=new Image();
+ const url=URL.createObjectURL(blob);
+ const dispose=()=>{
+  image.removeAttribute('src');
+  URL.revokeObjectURL(url);
+ };
+ try{
+  image.src=url;
+  await image.decode();
+  return {image,url,dispose};
+ }catch(error){
+  dispose();
+  throw error;
+ }
+}
+
+let copiedLoads=Promise.resolve();
+
+export function loadImageFromCopy(blob){
+ // 同じタイミングで表示エラーが起きても、原画のコピーとデコードを一枚ずつ行う。
+ const result=copiedLoads.then(async()=>{
+  let bytes;
+  try{
+   bytes=await blob.arrayBuffer();
+   if(bytes.byteLength!==blob.size)throw new Error('実バイト数が申告サイズと一致しません');
+  }catch(error){
+   throw new Error('原画データを読み取れません（'+error.name+'：'+error.message+'）',{cause:error});
+  }
+  try{return await loadDecodedImage(new Blob([bytes],{type:blob.type}));}
+  catch(error){throw new Error('原画は読み取れましたが、画像をデコードできません（'+error.name+'：'+error.message+'）',{cause:error});}
+ });
+ copiedLoads=result.then(()=>{},()=>{});
+ return result;
+}

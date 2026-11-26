@@ -1,4 +1,4 @@
-import {makeWorkingPreview,verifyOriginalBytes} from './image-preview.js';
+import {makeWorkingPreview,loadImageFromCopy} from './image-preview.js';
 
 // 再試行と縮小画像の再生成は一枚ずつ行い、一時的なメモリ使用量を抑える。
 let repairs=Promise.resolve();
@@ -58,18 +58,21 @@ export function createRecoverablePreview({label,attach,report,background=false,s
   attach(null);
   repairs=repairs.then(async()=>{
    if(frame!==current)return;
-   let reason;
    try{
-    await verifyOriginalBytes(current.item.blob);
-    reason='原画は読み取れましたが、プレビューを表示できません';
-   }catch{
-    reason=current.item.blob.size
-     ?'原画データを読み取れないか、画像形式を解釈できません'
-     :'原画データが0バイトです';
+    if(!current.item.blob.size)throw new Error('原画データが0バイトです');
+    const decoded=await loadImageFromCopy(current.item.blob);
+    if(frame!==current){decoded.dispose();return;}
+    url=decoded.url;
+    current.image=decoded.image;
+    current.image.alt=label+'の登録画像';
+    attach(decoded.image,url);
+    current.state='ok';
+    return;
+   }catch(error){
+    if(frame!==current)return;
+    current.state='failed';
+    current.reason=error.message;
    }
-   if(frame!==current)return;
-   current.state='failed';
-   current.reason=reason;
    reportError(current);
    if(current.retryAfterDiagnosis)retry();
 
