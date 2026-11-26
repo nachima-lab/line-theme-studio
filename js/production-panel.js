@@ -1,5 +1,6 @@
 import {IMAGE_ACCEPT} from './store.js';
 import {makeWorkingPreview} from './image-preview.js';
+import {createRecoverablePreview} from './recoverable-preview.js';
 import {HEX_COLOR,TEMPLATES,templateText} from './production-data.js';
 import {setupProductionTools} from './production-tools.js';
 
@@ -18,7 +19,13 @@ export function setupProductionPanel({save,setImage}){
  const fileLabel=id('production-character-name');
  const remove=id('production-remove-character');
  const tools=setupProductionTools(setImage);
- let project,url,selection=0;
+ const sheetError=id('production-character-error');
+ const characterPreview=createRecoverablePreview({
+  label:'キャラ表',
+  attach:image=>{thumbnail.replaceChildren(...(image?[image]:[]));thumbnail.hidden=!image;},
+  report:message=>{sheetError.textContent=message;sheetError.hidden=!message;}
+ });
+ let project,selection=0;
 
  function update(changes){save({...project.production,...changes});}
 
@@ -124,7 +131,7 @@ export function setupProductionPanel({save,setImage}){
   feedback.textContent='キャラ表を取り外しました。';
  });
 
- return function render(next,reopened=false){
+ function render(next,reopened=false){
   const old=project;
   project=next;
   tools(next);
@@ -135,13 +142,8 @@ export function setupProductionPanel({save,setImage}){
    copyField.hidden=true;
    copyField.value='';
   }
-  if(!next){
-   if(url)URL.revokeObjectURL(url);
-   url=null;
-   thumbnail.removeAttribute('src');
-   thumbnail.hidden=remove.hidden=true;
-   return;
-  }
+  characterPreview.show(next,next?.production.characterSheet);
+  if(!next){remove.hidden=true;return;}
   const p=next.production,last=old?.production;
   if(old?.id!==next.id||last?.colors!==p.colors)renderColors(p.colors);
   if(style.value!==p.style)style.value=p.style;
@@ -151,14 +153,9 @@ export function setupProductionPanel({save,setImage}){
    if(editor.value!==text)editor.value=text;
    reset.disabled=!Object.hasOwn(p.templates,key);
   }
-  if(old?.id!==next.id||last?.characterSheet!==p.characterSheet){
-   if(url)URL.revokeObjectURL(url);
-   const sheet=p.characterSheet;
-   url=sheet?URL.createObjectURL(sheet.preview??sheet.blob):null;
-   if(url)thumbnail.src=url;
-   else thumbnail.removeAttribute('src');
-   thumbnail.hidden=remove.hidden=!url;
-   fileLabel.textContent=sheet?.name??'未登録';
-  }
- };
+  remove.hidden=!p.characterSheet;
+  fileLabel.textContent=p.characterSheet?.name??'未登録';
+ }
+ render.retryFailed=characterPreview.retry;
+ return render;
 }

@@ -45,7 +45,7 @@ export function setupExtraPreviews(){
  const passError=document.getElementById('passcode-preview-error');
  const menuError=document.getElementById('menu-preview-error');
  const pressed=[false,false,false,false];
- let selectedMenu=null,projectId,queue=Promise.resolve();
+ let selectedMenu=null,projectId,currentProject,queue=Promise.resolve();
  const assets=new Map();
  const displayUrl=slot=>assets.get(slot)?.url;
 
@@ -160,6 +160,7 @@ export function setupExtraPreviews(){
  }
 
  function renderProject(project){
+  currentProject=project;
   if(projectId!==project?.id){
    projectId=project?.id;
    for(const {url} of assets.values())if(url)URL.revokeObjectURL(url);
@@ -184,5 +185,11 @@ export function setupExtraPreviews(){
    element.style.setProperty('--preview-ink',readableHeaderText(background));
   }
  }
- return {renderProject,renderSkin};
+ function retryFailed(){
+  const failed=[...assets].filter(([,asset])=>asset.error);
+  if(!failed.length)return;
+  for(const [slot] of failed)assets.delete(slot);
+  renderProject(currentProject);
+ }
+ return {renderProject,renderSkin,retryFailed};
 }

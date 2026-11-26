@@ -25,3 +25,34 @@ export async function makeWorkingPreview(blob){
   URL.revokeObjectURL(url);
  }
 }
+
+// Blob URLが使えない場合も、原画のバイトを別経路で検査する。
+export async function verifyOriginalBytes(blob){
+ if(!blob.size)throw new Error('原画が0バイトです');
+ const data=await new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onload=()=>resolve(reader.result);
+  reader.onerror=()=>reject(reader.error??new Error('原画を読み取れません'));
+  reader.onabort=()=>reject(new Error('原画の読み取りが中断されました'));
+  reader.readAsDataURL(blob);
+ });
+ const image=new Image();
+ try{
+  image.src=data;
+  await image.decode();
+ }finally{image.removeAttribute('src');}
+}
+
+export async function verifyOriginal(blob){
+ if(!blob.size)throw new Error('原画が0バイトです');
+ const image=new Image(),url=URL.createObjectURL(blob);
+ try{
+  image.src=url;
+  await image.decode();
+ }catch{
+  await verifyOriginalBytes(blob);
+ }finally{
+  image.removeAttribute('src');
+  URL.revokeObjectURL(url);
+ }
+}

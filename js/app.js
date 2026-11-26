@@ -3,12 +3,13 @@ import {renderPreview,renderBackground} from './preview.js';
 import {IMAGE_ACCEPT,IMAGE_SLOTS,createProject,defineCollection,loadCollection,saveCollection,parseLegacyJson} from './store.js';
 import {exportZip,importZip} from './backup-zip.js';
 import {makeWorkingPreview} from './image-preview.js';
+import {createRecoverablePreview} from './recoverable-preview.js';
 import {setupExportPanel} from './export-panel.js';
 import {setupPreviewTabs} from './preview-tabs.js';
 import {setupExtraPreviews} from './extra-previews.js';
 import {setupProductionPanel} from './production-panel.js';
 
-let skins=[],skinIds=[],collection,revision,backgroundUrl;
+let skins=[],skinIds=[],collection,revision;
 let saveQueue=Promise.resolve(),imageQueue=Promise.resolve();
 let dirty=false,busy=false,saveError=null;
 const groupsEl=document.getElementById('skin-groups');
@@ -33,6 +34,25 @@ const extraPreviews=setupExtraPreviews();
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
 const renderExport=setupExportPanel({
  saveSettings:exportSettings=>updateProject({exportSettings}),runOperation
+});
+
+const backgroundError=document.getElementById('background-preview-error');
+const backgroundPreview=createRecoverablePreview({
+ label:'トーク背景',background:true,
+ attach:(_,url)=>renderBackground(url),
+ report:message=>{backgroundError.textContent=message;backgroundError.hidden=!message;},
+ savePreview:(projectId,item,preview)=>savePreviewRepair('talkBackground',projectId,item,preview)
+});
+
+function retryFailedPreviews(){
+ backgroundPreview.retry();
+ for(const view of assetViews.values())view.display.retry();
+ extraPreviews.retryFailed();
+ renderProduction.retryFailed();
+}
+window.addEventListener('pageshow',retryFailedPreviews);
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible')retryFailedPreviews();
 });
 
 function status(message,error=false){
@@ -111,11 +131,17 @@ function updateProject(changes){
  renderProduction(updated);
 }
 
+function savePreviewRepair(slotId,projectId,item,preview){
+ const project=activeProject();
+ if(!project||busy||project.id!==projectId||pendingImages.has(slotId)||project.images[slotId]!==item)return;
+ const updated={...project,images:{...project.images,[slotId]:{...item,preview}}};
+ collection=defineCollection(collection.projects.map(candidate=>candidate.id===project.id?updated:candidate),project.id);
+ queueSave();
+}
+
 function showBackground(){
- const item=activeProject()?.images.talkBackground;
- if(backgroundUrl)URL.revokeObjectURL(backgroundUrl);
- backgroundUrl=item?URL.createObjectURL(item.preview??item.blob):null;
- renderBackground(backgroundUrl);
+ const project=activeProject(),item=project?.images.talkBackground;
+ backgroundPreview.show(project,item);
  document.getElementById('background-status').textContent=item?'背景画像：'+item.name:'背景画像：未登録';
  chooseBackground.textContent=item?'背景画像を差し替える':'背景画像を登録';
  removeButton.hidden=!item;
@@ -167,18 +193,9 @@ function removeImage(slotId){
 
 function renderAssetSlot(slotId){
  const view=assetViews.get(slotId);
- const item=activeProject()?.images[slotId];
- if(view.url)URL.revokeObjectURL(view.url);
- view.url=item?URL.createObjectURL(item.preview??item.blob):null;
- if(item){
-  const image=document.createElement('img');
-  image.loading='lazy';
-  image.decoding='async';
-  image.src=view.url;
-  image.alt=view.label+'の登録画像';
-  image.addEventListener('error',()=>image.replaceWith('プレビューを表示できません'));
-  view.preview.replaceChildren(image);
- }else view.preview.textContent='画像未登録';
+ const project=activeProject(),item=project?.images[slotId];
+ view.display.show(project,item);
+ if(!item)view.preview.textContent='画像未登録';
  view.name.textContent=item?.name??'';
  const action=item?'画像を差し替える':'画像を登録する';
  view.upload.textContent=action;
@@ -209,7 +226,13 @@ function initAssetSlots(){
   controls.append(upload,fileInput,remove);
   card.append(heading,preview,name,controls);
   (slot.id.startsWith('menu-')?menuSlotsEl:assetSlotsEl).append(card);
-  assetViews.set(slot.id,{label:slot.label,preview,name,upload,remove,url:null});
+  const display=createRecoverablePreview({
+   label:slot.label,
+   attach:image=>preview.replaceChildren(...(image?[image]:[])),
+   report:message=>{if(message)preview.textContent=message;},
+   savePreview:(projectId,item,copy)=>savePreviewRepair(slot.id,projectId,item,copy)
+  });
+  assetViews.set(slot.id,{label:slot.label,preview,name,upload,remove,display});
  }
 }
 

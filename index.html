@@ -54,7 +54,7 @@
   <button type="button" role="tab" id="tab-passcode" aria-controls="panel-passcode" aria-selected="false" tabindex="-1">パスコード</button>
   <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1">メニュー</button>
  </div>
- <div id="panel-talk" role="tabpanel" aria-labelledby="tab-talk"><div class="section-heading"><div><h2>完成イメージ</h2><p id="selected-name">スキンを選択してください</p></div><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></div><div class="phone-frame"><div class="talk-header" id="talk-header"><span class="back-mark" aria-hidden="true">‹</span><strong>トーク</strong><span class="header-dots" aria-hidden="true">•••</span></div><div class="talk-area" id="talk-area"><div class="message-row other"><div class="avatar" aria-hidden="true">相</div><div class="bubble" id="other-bubble">こんにちは</div></div><div class="message-row own"><div class="bubble" id="own-bubble">よろしく！</div></div></div><div class="talk-footer" aria-label="入力欄の仮表示"><span>＋</span><div class="input-mock"></div><span>☺</span></div></div><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p class="notice">配色は実測値ベースの参考表示です。</p></div>
+ <div id="panel-talk" role="tabpanel" aria-labelledby="tab-talk"><div class="section-heading"><div><h2>完成イメージ</h2><p id="selected-name">スキンを選択してください</p></div><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></div><div class="phone-frame"><div class="talk-header" id="talk-header"><span class="back-mark" aria-hidden="true">‹</span><strong>トーク</strong><span class="header-dots" aria-hidden="true">•••</span></div><div class="talk-area" id="talk-area"><div class="message-row other"><div class="avatar" aria-hidden="true">相</div><div class="bubble" id="other-bubble">こんにちは</div></div><div class="message-row own"><div class="bubble" id="own-bubble">よろしく！</div></div></div><div class="talk-footer" aria-label="入力欄の仮表示"><span>＋</span><div class="input-mock"></div><span>☺</span></div></div><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p id="background-preview-error" class="notice" role="status" hidden></p><p class="notice">配色は実測値ベースの参考表示です。</p></div>
  <div id="panel-passcode" role="tabpanel" aria-labelledby="tab-passcode" hidden>
   <div class="phone-frame passcode-frame">
    <div id="passcode-upper" class="passcode-upper">
@@ -94,7 +94,8 @@
  <details>
   <summary>制作メモ・キャラ表</summary>
   <h3>キャラ表</h3>
-  <img id="production-character-image" alt="登録したキャラ表" hidden>
+  <div id="production-character-image" hidden></div>
+  <p id="production-character-error" role="status" hidden></p>
   <p id="production-character-name">未登録</p>
   <button type="button" id="production-choose-character">キャラ表を登録・差し替え</button>
   <input type="file" id="production-character-input" hidden>

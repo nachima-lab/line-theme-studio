@@ -106,5 +106,5 @@
 #production-colors{list-style:none;padding:0}
 #production-colors li{margin:6px 0}
 .production-swatch::before{content:'';display:inline-block;width:1em;height:1em;vertical-align:middle;margin-right:6px;border:1px solid #837a70;border-radius:4px;background:var(--swatch)}
-#production-character-image,#production-draft{display:block;max-width:100%;max-height:360px;object-fit:contain}
+#production-character-image img,#production-draft{display:block;max-width:100%;max-height:360px;object-fit:contain}
 #production-draft{background:repeating-conic-gradient(#dedbd6 0 25%,#fff 0 50%) 0 0/20px 20px}
