@@ -4,6 +4,8 @@ import {IMAGE_ACCEPT,IMAGE_SLOTS,createProject,defineCollection,loadCollection,s
 import {exportZip,importZip} from './backup-zip.js';
 import {makeWorkingPreview} from './image-preview.js';
 import {setupExportPanel} from './export-panel.js';
+import {setupPreviewTabs} from './preview-tabs.js';
+import {setupExtraPreviews} from './extra-previews.js';
 
 let skins=[],skinIds=[],collection,revision,backgroundUrl;
 let saveQueue=Promise.resolve(),imageQueue=Promise.resolve();
@@ -25,6 +27,8 @@ const list=document.getElementById('project-list');
 const newButton=document.getElementById('new-project');
 const renameButton=document.getElementById('rename-project');
 const deleteButton=document.getElementById('delete-project');
+setupPreviewTabs();
+const extraPreviews=setupExtraPreviews();
 const renderExport=setupExportPanel({
  saveSettings:exportSettings=>updateProject({exportSettings}),runOperation
 });
@@ -101,6 +105,7 @@ function updateProject(changes){
  collection=defineCollection(collection.projects.map(project=>project.id===updated.id?updated:project),updated.id);
  queueSave();
  renderExport(updated);
+ extraPreviews.renderProject(updated);
 }
 
 function showBackground(){
@@ -205,6 +210,7 @@ function chooseSkin(id,save=true){
  if(!skin)return;
  if(save)updateProject({skinId:id});
  renderPreview(skin);
+ extraPreviews.renderSkin(skin);
  for(const button of groupsEl.querySelectorAll('.skin-tile')){
   button.setAttribute('aria-pressed',String(button.dataset.skinId===id));
  }
@@ -228,6 +234,7 @@ function renderCollection(){
  for(const button of groupsEl.querySelectorAll('.skin-tile'))button.disabled=!project;
  if(project)chooseSkin(project.skinId,false);
  renderExport(project);
+ extraPreviews.renderProject(project);
  showBackground();
  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
 }

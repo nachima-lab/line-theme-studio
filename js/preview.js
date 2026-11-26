@@ -1,7 +1,7 @@
 import {color} from './skins.js';
 const el={header:document.getElementById('talk-header'),other:document.getElementById('other-bubble'),own:document.getElementById('own-bubble'),name:document.getElementById('selected-name'),area:document.getElementById('talk-area')};
 // ヘッダーの文字色はJSONにないため、背景色から読みやすい白／黒を計算する。
-function readableHeaderText(hex){
+export function readableHeaderText(hex){
  const match=/^#([0-9a-f]{6})$/i.exec(hex||'');
  if(!match)return '#222222';
  const rgb=[0,2,4].map(i=>parseInt(match[1].slice(i,i+2),16)/255);
