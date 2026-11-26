@@ -18,13 +18,19 @@ function assertName(name){if(typeof name!=='string'||!name||name.includes('..')|
 export async function writeZip(entries){
  if(entries.length>MAX_FILES)throw new Error('ファイル数が多すぎます');
  const locals=[],centrals=[];let offset=0,total=0;
- for(const {name,data} of entries){
+ for(const {name,data,label} of entries){
   assertName(name);
   const nameBytes=enc.encode(name),blob=data instanceof Blob?data:new Blob([data]);
   if(blob.size>MAX_ENTRY||nameBytes.length>65535)throw new Error('ファイルが大きすぎます');
   total+=blob.size;
   if(total>MAX_TOTAL)throw new Error('バックアップの合計サイズが大きすぎます');
-  const crc=await crc32(blob),local=new Uint8Array(30+nameBytes.length),lv=new DataView(local.buffer);
+  let crc;
+  try{crc=await crc32(blob);}
+  catch(error){
+   if(label)throw new Error(label+'：原画データの読み取りに失敗しました',{cause:error});
+   throw error;
+  }
+  const local=new Uint8Array(30+nameBytes.length),lv=new DataView(local.buffer);
   put32(lv,0,0x04034b50);put16(lv,4,20);put16(lv,6,0x800);
   put32(lv,14,crc);put32(lv,18,blob.size);put32(lv,22,blob.size);put16(lv,26,nameBytes.length);local.set(nameBytes,30);
   const central=new Uint8Array(46+nameBytes.length),cv=new DataView(central.buffer);

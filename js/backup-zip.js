@@ -1,34 +1,45 @@
 import {COLLECTION_VERSION,IMAGE_SLOTS,LEGACY_SLOT_IDS,convertLegacy,validateCollection} from './store.js';
 import {writeZip,readZip} from './zip.js';
+import {verifyOriginal} from './image-preview.js';
 
 const FORMAT='line-theme-studio-zip',BACKUP_VERSION=3;
 const mimeToExt=new Map([
  ['image/png','png'],['image/jpeg','jpg'],['image/webp','webp'],['image/heic','heic'],['image/heif','heif']
 ]);
 const slotIds=IMAGE_SLOTS.map(slot=>slot.id);
+const slotLabels=new Map(IMAGE_SLOTS.map(({id,label})=>[id,label]));
 const json=new TextDecoder('utf-8',{fatal:true});
 
-export function exportZip(collection,skinIds){
+export async function exportZip(collection,skinIds){
  const clean=validateCollection(collection,skinIds),entries=[];
- function pack(item,base){
+ function pack(item,base,label){
   const ext=mimeToExt.get(item.blob.type);
   if(!ext)throw new Error('対応していない画像形式です: '+item.name);
   const path=base+'.'+ext;
-  entries.push({name:path,data:item.blob});
+  entries.push({name:path,data:item.blob,label});
   return {path,name:item.name,type:item.blob.type};
  }
- function packSlots(images,prefix){
-  return Object.fromEntries(Object.entries(images).map(([slot,item])=>[slot,pack(item,prefix+slot)]));
+ function packSlots(images,prefix,projectName,suffix=''){
+  return Object.fromEntries(Object.entries(images).map(([slot,item])=>[
+   slot,pack(item,prefix+slot,'「'+projectName+'」の'+slotLabels.get(slot)+suffix)
+  ]));
  }
  const projects=clean.projects.map(({id,name,skinId,images,exportSettings,production},index)=>({
-  id,name,skinId,exportSettings,images:packSlots(images,'images/'+index+'/'),
+  id,name,skinId,exportSettings,images:packSlots(images,'images/'+index+'/',name),
   production:{...production,
-   characterSheet:production.characterSheet?pack(production.characterSheet,'references/'+index+'/character-sheet'):null,
-   undo:packSlots(production.undo,'undo/'+index+'/')}
+   characterSheet:production.characterSheet?pack(production.characterSheet,'references/'+index+'/character-sheet','「'+name+'」のキャラ表'):null,
+   undo:packSlots(production.undo,'undo/'+index+'/',name,'（取り消し用）')}
  }));
  const meta={...clean,version:BACKUP_VERSION,format:FORMAT,exportedAt:new Date().toISOString(),projects};
  const manifest=new Blob([JSON.stringify(meta)]);
  if(manifest.size>1024*1024)throw new Error('作品一覧が大きすぎます');
+ const checked=new Set();
+ for(const {data,label} of entries){
+  if(checked.has(data))continue;
+  try{await verifyOriginal(data);}
+  catch{throw new Error(label+'：原画データを読み取れないか、画像形式を解釈できません');}
+  checked.add(data);
+ }
  return writeZip([{name:'project.json',data:manifest},...entries]);
 }
 
