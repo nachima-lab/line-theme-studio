@@ -69,14 +69,25 @@ export function createRecoverablePreview({label,attach,report,background=false,s
    }
    if(frame!==current)return;
    current.state='failed';
-   report('「'+current.projectName+'」の'+label+'：'+reason+'。');
+   current.reason=reason;
+   reportError(current);
    if(current.retryAfterDiagnosis)retry();
 
   });
  }
 
+ function reportError(current){
+  report('「'+current.projectName+'」の'+label+'：'+current.reason+'。');
+ }
+
  function show(project,item){
-  if(frame?.item===item&&frame?.projectId===project?.id)return;
+  if(frame&&frame.item===item&&frame.projectId===project?.id){
+   if(frame.projectName!==project.name){
+    frame.projectName=project.name;
+    if(frame.state==='failed')reportError(frame);
+   }
+   return;
+  }
   release();
   attach(null);
   report('');
