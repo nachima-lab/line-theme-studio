@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f5f1"><title>LINE着せかえ制作室</title><link rel="stylesheet" href="./css/style.css"></head>
-<body><header class="app-header"><div><p class="eyebrow">LINE着せかえ制作室 · Phase 3</p><h1>LINE着せかえ制作室</h1></div><span class="count" id="skin-count">読み込み中</span></header>
+<body><header class="app-header"><div><p class="eyebrow">LINE着せかえ制作室 · Phase 4</p><h1>LINE着せかえ制作室</h1></div><span class="count" id="skin-count">読み込み中</span></header>
 <main>
 <section class="project-section" aria-labelledby="project-heading">
  <h2 id="project-heading">作品管理</h2>
@@ -48,7 +48,37 @@
   </table>
  </div>
 </section>
-<section class="preview-section" hidden aria-label="トーク画面プレビュー"><div class="section-heading"><div><h2>完成イメージ</h2><p id="selected-name">スキンを選択してください</p></div><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></div><div class="phone-frame"><div class="talk-header" id="talk-header"><span class="back-mark" aria-hidden="true">‹</span><strong>トーク</strong><span class="header-dots" aria-hidden="true">•••</span></div><div class="talk-area" id="talk-area"><div class="message-row other"><div class="avatar" aria-hidden="true">相</div><div class="bubble" id="other-bubble">こんにちは</div></div><div class="message-row own"><div class="bubble" id="own-bubble">よろしく！</div></div></div><div class="talk-footer" aria-label="入力欄の仮表示"><span>＋</span><div class="input-mock"></div><span>☺</span></div></div><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p class="notice">配色は実測値ベースの参考表示です。</p></section>
+<section class="preview-section" hidden aria-label="画面プレビュー">
+ <div class="preview-tabs" role="tablist" aria-label="画面プレビュー">
+  <button type="button" role="tab" id="tab-talk" aria-controls="panel-talk" aria-selected="true">トーク</button>
+  <button type="button" role="tab" id="tab-passcode" aria-controls="panel-passcode" aria-selected="false" tabindex="-1">パスコード</button>
+  <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1">メニュー</button>
+ </div>
+ <div id="panel-talk" role="tabpanel" aria-labelledby="tab-talk"><div class="section-heading"><div><h2>完成イメージ</h2><p id="selected-name">スキンを選択してください</p></div><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></div><div class="phone-frame"><div class="talk-header" id="talk-header"><span class="back-mark" aria-hidden="true">‹</span><strong>トーク</strong><span class="header-dots" aria-hidden="true">•••</span></div><div class="talk-area" id="talk-area"><div class="message-row other"><div class="avatar" aria-hidden="true">相</div><div class="bubble" id="other-bubble">こんにちは</div></div><div class="message-row own"><div class="bubble" id="own-bubble">よろしく！</div></div></div><div class="talk-footer" aria-label="入力欄の仮表示"><span>＋</span><div class="input-mock"></div><span>☺</span></div></div><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p class="notice">配色は実測値ベースの参考表示です。</p></div>
+ <div id="panel-passcode" role="tabpanel" aria-labelledby="tab-passcode" hidden>
+  <div class="phone-frame passcode-frame">
+   <div id="passcode-upper" class="passcode-upper">
+    <h2>パスコード</h2>
+    <div id="passcode-positions" class="passcode-positions" aria-label="4桁の表示"></div>
+   </div>
+   <div id="passcode-keypad" class="passcode-keypad">
+    <div id="passcode-keys" class="passcode-keys" aria-label="プレビュー用テンキー"></div>
+   </div>
+  </div>
+  <p class="notice">桁をタップすると、その桁のOFF／ONが切り替わります。</p>
+  <p id="passcode-preview-error" class="notice" role="status" hidden></p>
+ </div>
+ <div id="panel-menu" role="tabpanel" aria-labelledby="tab-menu" hidden>
+  <div class="phone-frame menu-frame">
+   <h2>メニュー</h2>
+   <div class="menu-preview-scroll" tabindex="0" aria-label="メニューアイコン。横にスクロールできます">
+    <div id="menu-preview-items" class="menu-preview-items"></div>
+   </div>
+  </div>
+  <p class="notice">アイコンをタップしてOFF／ONを確認できます。横にスワイプすると全9種を表示できます。</p>
+  <p id="menu-preview-error" class="notice" role="status" hidden></p>
+ </div>
+</section>
 <section class="assets-section" aria-labelledby="assets-heading" hidden>
  <h2 id="assets-heading">原画スロット（全25枠）</h2>
  <p class="asset-help">トーク背景はトーク画面プレビューで管理します。</p>

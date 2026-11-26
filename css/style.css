@@ -62,3 +62,32 @@
 .submission-table th,.submission-table td{text-align:left;padding:6px;border-bottom:1px solid #e2dbd0}
 .export-attention{background:#fff0d0}
 @media(min-width:721px){.preview-section{grid-row:3 / span 2}}
+
+/* Phase 4：同じプレビュー領域で表示する画面を切り替える。 */
+.preview-tabs{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:4px;margin:0 0 16px;padding:4px;border-radius:12px;background:#ebe6df}
+.preview-tabs button{min-height:44px;border:0;border-radius:9px;background:transparent;color:#4a443e;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.preview-tabs button[aria-selected=true]{color:#282521;background:#fff;box-shadow:0 1px 4px #0000001a}
+.passcode-upper,.passcode-keypad{display:grid;place-content:center;color:var(--preview-ink,#282521)}
+.passcode-upper{flex:1;min-height:122px;gap:12px;text-align:center;padding:12px}
+.passcode-keypad{flex:1.6;padding:8px}
+.passcode-positions{display:flex;justify-content:center;gap:4px}
+.passcode-positions button,.passcode-keys button,.menu-preview-items button{min-width:44px;min-height:44px;font:inherit;cursor:pointer}
+.passcode-positions button{display:grid;place-items:center;width:48px;height:48px;border:0;border-radius:8px;background:transparent;color:inherit}
+.passcode-positions img,.passcode-positions .preview-placeholder{grid-area:1/1}
+.passcode-positions img{width:100%;height:100%;object-fit:contain}
+.passcode-positions .preview-placeholder{width:18px;height:18px;border:2px solid currentColor;border-radius:50%}
+.passcode-positions [aria-pressed=true] .preview-placeholder{background:currentColor}
+.passcode-keys{display:grid;grid-template-columns:repeat(3,minmax(44px,64px));gap:6px}
+.passcode-keys button{border:1px solid color-mix(in srgb,currentColor 28%,transparent);border-radius:9px;background:transparent;color:inherit}
+.passcode-keys button:active{background:color-mix(in srgb,currentColor 15%,transparent)}
+.menu-frame{height:auto;min-height:164px;justify-content:end;padding:12px 0 16px;background:#f4f1eb}
+.menu-frame h2{padding:0 14px 12px}
+.menu-preview-scroll{overflow-x:auto;overscroll-behavior-x:contain;background:#fff}
+.menu-preview-items{display:grid;grid-template-columns:repeat(9,minmax(54px,1fr));min-width:486px;background:#f1ece3 no-repeat top center/100% 54px}
+.menu-preview-items button{display:grid;justify-items:center;align-content:start;gap:2px;padding:1px 0 4px;border:0;background:transparent;color:#282521;font-size:10px;white-space:nowrap}
+.menu-preview-items .preview-glyph{width:44px;height:52px;display:grid;place-items:center}
+.menu-preview-items img,.menu-preview-items .preview-placeholder{grid-area:1/1}
+.menu-preview-items img{width:100%;height:100%;object-fit:contain}
+.menu-preview-items .preview-placeholder{width:21px;height:21px;border:1px dashed #514a41;border-radius:50%;background:#fff}
+.menu-preview-items button[aria-pressed=true] .preview-placeholder{border-style:solid;background:#514a41}
+.menu-preview-items button[aria-pressed=true] .menu-label{font-weight:700;text-decoration:underline;text-underline-offset:3px}
