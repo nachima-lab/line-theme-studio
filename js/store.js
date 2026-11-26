@@ -24,7 +24,7 @@ const DB_NAME='line-theme-studio',STORE='projects',LEGACY_KEY='current',COLLECTI
 export const COLLECTION_VERSION=2;
 
 export function createProject(name){
- return {id:crypto.randomUUID(),name,skinId:'beige_01',images:{}};
+ return {id:crypto.randomUUID(),name,skinId:'beige_01',images:{},production:emptyProduction()};
 }
 
 export function defineCollection(projects,activeId){

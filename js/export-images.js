@@ -104,7 +104,7 @@ function fullRect({width,height}){
  return {x:0,y:0,width,height};
 }
 
-function exteriorMask({data,width,height},threshold){
+export function exteriorMask({data,width,height},threshold){
  const count=width*height,mask=new Uint8Array(count),queue=new Uint32Array(count);
  let read=0,write=0;
  function visit(pixel){
@@ -183,6 +183,16 @@ function encode(context){
   if(blob?.type==='image/png')resolve(blob);
   else reject(new Error('PNGに変換できませんでした'));
  },'image/png'));
+}
+
+export async function editOriginal(blob,edit){
+ const pixels=await originalPixels(blob);
+ edit(pixels);
+ const context=canvas(pixels.width,pixels.height);
+ try{
+  context.putImageData(pixels,0,0);
+  return await encode(context);
+ }finally{release(context);}
 }
 
 async function checkedPng(context){
