@@ -20,7 +20,7 @@ export const IMAGE_SLOTS=[
  })))
 ];
 export const LEGACY_SLOT_IDS=['talkBackground','mainImage','menuIcon'];
-const DB_NAME='line-theme-studio',STORE='projects',LEGACY_KEY='current',COLLECTION_KEY='collection';
+const DB_NAME='line-theme-studio-partial-backup-test-468d3ad',STORE='projects',LEGACY_KEY='current',COLLECTION_KEY='collection';
 export const COLLECTION_VERSION=2;
 
 export function createProject(name){
