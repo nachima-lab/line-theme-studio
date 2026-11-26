@@ -10,7 +10,7 @@ const json=new TextDecoder('utf-8',{fatal:true});
 
 export function exportZip(collection,skinIds){
  const clean=validateCollection(collection,skinIds),entries=[];
- const projects=clean.projects.map(({id,name,skinId,images},index)=>{
+ const projects=clean.projects.map(({id,name,skinId,images,exportSettings},index)=>{
   const metadata={};
   for(const [slotId,item] of Object.entries(images)){
    const ext=mimeToExt.get(item.blob.type);
@@ -19,7 +19,7 @@ export function exportZip(collection,skinIds){
    metadata[slotId]={path,name:item.name,type:item.blob.type};
    entries.push({name:path,data:item.blob});
   }
-  return {id,name,skinId,images:metadata};
+  return {id,name,skinId,images:metadata,exportSettings};
  });
  const meta={...clean,format:FORMAT,exportedAt:new Date().toISOString(),projects};
  const manifest=new Blob([JSON.stringify(meta)]);

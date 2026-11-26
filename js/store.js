@@ -1,3 +1,5 @@
+import {readAdjustments} from './export-spec.js';
+
 // IDは保存済みの画像を参照するため、表示名とは独立させる。
 export const IMAGE_ACCEPT='image/png,image/jpeg,image/webp,image/heic,image/heif';
 const menuFeatures=[
@@ -52,7 +54,8 @@ export function validateCollection(record,skinIds){
    throw new Error('作品データが正しくありません');
   }
   ids.add(project.id);
-  return {...project,images:checkedImages(project.images,IMAGE_SLOTS.map(slot=>slot.id))};
+  return {...project,exportSettings:readAdjustments(project.exportSettings),
+   images:checkedImages(project.images,IMAGE_SLOTS.map(slot=>slot.id))};
  });
  if(projects.length?!ids.has(record.activeId):record.activeId!==null){
   throw new Error('選択中の作品が見つかりません');
