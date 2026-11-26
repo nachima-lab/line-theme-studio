@@ -3,6 +3,7 @@ import {renderPreview,renderBackground} from './preview.js';
 import {IMAGE_ACCEPT,IMAGE_SLOTS,createProject,defineCollection,loadCollection,saveCollection,parseLegacyJson} from './store.js';
 import {exportZip,importZip} from './backup-zip.js';
 import {makeWorkingPreview} from './image-preview.js';
+import {setupExportPanel} from './export-panel.js';
 
 let skins=[],skinIds=[],collection,revision,backgroundUrl;
 let saveQueue=Promise.resolve(),imageQueue=Promise.resolve();
@@ -24,6 +25,9 @@ const list=document.getElementById('project-list');
 const newButton=document.getElementById('new-project');
 const renameButton=document.getElementById('rename-project');
 const deleteButton=document.getElementById('delete-project');
+const renderExport=setupExportPanel({
+ saveSettings:exportSettings=>updateProject({exportSettings}),runOperation
+});
 
 function status(message,error=false){
  statusEl.textContent=message;
@@ -96,6 +100,7 @@ function updateProject(changes){
  const updated={...activeProject(),...changes};
  collection=defineCollection(collection.projects.map(project=>project.id===updated.id?updated:project),updated.id);
  queueSave();
+ renderExport(updated);
 }
 
 function showBackground(){
@@ -222,6 +227,7 @@ function renderCollection(){
  for(const section of editors)section.hidden=!project;
  for(const button of groupsEl.querySelectorAll('.skin-tile'))button.disabled=!project;
  if(project)chooseSkin(project.skinId,false);
+ renderExport(project);
  showBackground();
  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
 }
