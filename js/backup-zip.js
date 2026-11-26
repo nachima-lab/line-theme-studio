@@ -1,7 +1,7 @@
 import {COLLECTION_VERSION,IMAGE_SLOTS,LEGACY_SLOT_IDS,convertLegacy,validateCollection} from './store.js';
 import {writeZip,readZip} from './zip.js';
 
-const FORMAT='line-theme-studio-zip';
+const FORMAT='line-theme-studio-zip',BACKUP_VERSION=3;
 const mimeToExt=new Map([
  ['image/png','png'],['image/jpeg','jpg'],['image/webp','webp'],['image/heic','heic'],['image/heif','heif']
 ]);
@@ -10,21 +10,37 @@ const json=new TextDecoder('utf-8',{fatal:true});
 
 export function exportZip(collection,skinIds){
  const clean=validateCollection(collection,skinIds),entries=[];
- const projects=clean.projects.map(({id,name,skinId,images,exportSettings},index)=>{
-  const metadata={};
-  for(const [slotId,item] of Object.entries(images)){
-   const ext=mimeToExt.get(item.blob.type);
-   if(!ext)throw new Error('対応していない画像形式です: '+item.name);
-   const path='images/'+index+'/'+slotId+'.'+ext;
-   metadata[slotId]={path,name:item.name,type:item.blob.type};
-   entries.push({name:path,data:item.blob});
-  }
-  return {id,name,skinId,images:metadata,exportSettings};
- });
- const meta={...clean,format:FORMAT,exportedAt:new Date().toISOString(),projects};
+ function pack(item,base){
+  const ext=mimeToExt.get(item.blob.type);
+  if(!ext)throw new Error('対応していない画像形式です: '+item.name);
+  const path=base+'.'+ext;
+  entries.push({name:path,data:item.blob});
+  return {path,name:item.name,type:item.blob.type};
+ }
+ function packSlots(images,prefix){
+  return Object.fromEntries(Object.entries(images).map(([slot,item])=>[slot,pack(item,prefix+slot)]));
+ }
+ const projects=clean.projects.map(({id,name,skinId,images,exportSettings,production},index)=>({
+  id,name,skinId,exportSettings,images:packSlots(images,'images/'+index+'/'),
+  production:{...production,
+   characterSheet:production.characterSheet?pack(production.characterSheet,'references/'+index+'/character-sheet'):null,
+   undo:packSlots(production.undo,'undo/'+index+'/')}
+ }));
+ const meta={...clean,version:BACKUP_VERSION,format:FORMAT,exportedAt:new Date().toISOString(),projects};
  const manifest=new Blob([JSON.stringify(meta)]);
  if(manifest.size>1024*1024)throw new Error('作品一覧が大きすぎます');
  return writeZip([{name:'project.json',data:manifest},...entries]);
+}
+
+function restoreImage(info,base,entries){
+ const ext=mimeToExt.get(info?.type);
+ if(!ext||typeof info.name!=='string'||info.path!==base+'.'+ext){
+  throw new Error('画像ファイルの情報が不正です');
+ }
+ const data=entries.get(info.path);
+ if(!data)throw new Error('画像ファイルが不足しています: '+info.name);
+ entries.delete(info.path);
+ return {name:info.name,blob:data.slice(0,data.size,info.type)};
 }
 
 function restoreImages(images,ids,prefix,entries){
@@ -33,14 +49,7 @@ function restoreImages(images,ids,prefix,entries){
  for(const [slotId,info] of Object.entries(images)){
   if(!ids.includes(slotId))throw new Error('不明な画像スロットがあります');
   if(info===null)continue;
-  const ext=mimeToExt.get(info?.type);
-  if(!ext||typeof info.name!=='string'||info.path!==prefix+slotId+'.'+ext){
-   throw new Error('画像ファイルの情報が不正です');
-  }
-  const data=entries.get(info.path);
-  if(!data)throw new Error('画像ファイルが不足しています: '+info.name);
-  restored.push([slotId,{name:info.name,blob:data.slice(0,data.size,info.type)}]);
-  entries.delete(info.path);
+  restored.push([slotId,restoreImage(info,prefix+slotId,entries)]);
  }
  return Object.fromEntries(restored);
 }
@@ -58,11 +67,19 @@ export async function importZip(file,skinIds){
  if(meta.version===1){
   const old=meta.project;
   result={legacy:convertLegacy({...old,version:1,images:restoreImages(old?.images,LEGACY_SLOT_IDS,'images/',entries)},skinIds)};
- }else if(meta.version===COLLECTION_VERSION&&Array.isArray(meta.projects)){
-  const projects=meta.projects.map((project,index)=>({
-   ...project,images:restoreImages(project?.images,slotIds,'images/'+index+'/',entries)
-  }));
-  result={collection:validateCollection({...meta,projects},skinIds)};
+ }else if([2,BACKUP_VERSION].includes(meta.version)&&Array.isArray(meta.projects)){
+  const projects=meta.projects.map((project,index)=>{
+   const images=restoreImages(project?.images,slotIds,'images/'+index+'/',entries);
+   let production;
+   if(meta.version===BACKUP_VERSION){
+    const data=project.production;
+    if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('制作メモの情報がありません');
+    const characterSheet=data.characterSheet===null?null:restoreImage(data.characterSheet,'references/'+index+'/character-sheet',entries);
+    production={...data,characterSheet,undo:restoreImages(data.undo,slotIds,'undo/'+index+'/',entries)};
+   }
+   return {...project,images,production};
+  });
+  result={collection:validateCollection({...meta,version:COLLECTION_VERSION,projects},skinIds)};
  }else throw new Error('対応していないバックアップです');
  if(entries.size)throw new Error('想定外のファイルが含まれています');
  return result;

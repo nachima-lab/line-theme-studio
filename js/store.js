@@ -1,4 +1,5 @@
 import {readAdjustments} from './export-spec.js';
+import {emptyProduction,HEX_COLOR,TEMPLATES} from './production-data.js';
 
 // IDは保存済みの画像を参照するため、表示名とは独立させる。
 export const IMAGE_ACCEPT='image/png,image/jpeg,image/webp,image/heic,image/heif';
@@ -45,6 +46,23 @@ function checkedImages(images,ids){
  return Object.fromEntries(entries.filter(([,item])=>item!==null));
 }
 
+function validateProduction(value,images,slots){
+ if(value===undefined)return emptyProduction();
+ const {colors,style,world,templates,characterSheet,undo}=value??{};
+ if(!Array.isArray(colors)||colors.length>8||colors.some(color=>typeof color!=='string'||!HEX_COLOR.test(color))
+    ||typeof style!=='string'||typeof world!=='string'
+    ||!templates||typeof templates!=='object'||Array.isArray(templates)
+    ||(characterSheet!==null&&!validateImage(characterSheet))){
+  throw new Error('制作メモの形式が正しくありません');
+ }
+ const keys=TEMPLATES.map(([key])=>key);
+ for(const [key,text] of Object.entries(templates)){
+  if(!keys.includes(key)||typeof text!=='string')throw new Error('指示文の形式が正しくありません');
+ }
+ return {colors:colors.map(color=>color.toUpperCase()),style,world,templates,characterSheet,
+  undo:checkedImages(undo,slots.filter(slot=>images[slot]))};
+}
+
 export function validateCollection(record,skinIds){
  if(record?.version!==COLLECTION_VERSION||!Array.isArray(record.projects))throw new Error('作品一覧の形式が正しくありません');
  const ids=new Set();
@@ -54,8 +72,10 @@ export function validateCollection(record,skinIds){
    throw new Error('作品データが正しくありません');
   }
   ids.add(project.id);
-  return {...project,exportSettings:readAdjustments(project.exportSettings),
-   images:checkedImages(project.images,IMAGE_SLOTS.map(slot=>slot.id))};
+  const slots=IMAGE_SLOTS.map(slot=>slot.id);
+  const images=checkedImages(project.images,slots);
+  return {...project,exportSettings:readAdjustments(project.exportSettings),images,
+   production:validateProduction(project.production,images,slots)};
  });
  if(projects.length?!ids.has(record.activeId):record.activeId!==null){
   throw new Error('選択中の作品が見つかりません');
