@@ -3,11 +3,15 @@ const enc=new TextEncoder(),dec=new TextDecoder('utf-8',{fatal:true});
 const MAX_FILES=65534,MAX_ENTRY=80*1024*1024,MAX_TOTAL=300*1024*1024;
 const MAX_OVERHEAD=16*1024*1024,CHUNK=1024*1024;
 const crcTable=Uint32Array.from({length:256},(_,n)=>{let c=n;for(let j=0;j<8;j++)c=c&1?0xedb88320^(c>>>1):c>>>1;return c>>>0;});
+function accumulateCrc(crc,bytes){
+ for(const byte of bytes)crc=crcTable[(crc^byte)&255]^(crc>>>8);
+ return crc;
+}
 export async function crc32(blob){
  let crc=0xffffffff;
  for(let offset=0;offset<blob.size;offset+=CHUNK){
   const bytes=new Uint8Array(await blob.slice(offset,offset+CHUNK).arrayBuffer());
-  for(const byte of bytes)crc=crcTable[(crc^byte)&255]^(crc>>>8);
+  crc=accumulateCrc(crc,bytes);
  }
  return (crc^0xffffffff)>>>0;
 }
@@ -44,7 +48,7 @@ export async function writeZip(entries){
  return new Blob([...locals,...centrals,end],{type:'application/zip'});
 }
 
-export async function readZip(file){
+export async function readZipDirectory(file){
  if(file.size>MAX_TOTAL+MAX_OVERHEAD)throw new Error('ZIPが大きすぎます');
  const tailStart=Math.max(0,file.size-65557);
  const tail=new DataView(await file.slice(tailStart).arrayBuffer());
@@ -81,10 +85,28 @@ export async function readZip(file){
   const localName=dec.decode(await file.slice(localOffset+30,localOffset+30+nlen).arrayBuffer());
   if(localName!==name)throw new Error('ZIPのファイル名が一致しません');
   total+=raw;if(total>MAX_TOTAL)throw new Error('ZIPの合計サイズが大きすぎます');
-  const data=file.slice(dataStart,dataStart+raw);
-  if(await crc32(data)!==crc)throw new Error('ZIP内のデータが破損しています');
-  result.set(name,data);pos=next;
+  result.set(name,{offset:dataStart,size:raw,crc});pos=next;
  }
  if(pos!==size)throw new Error('ZIPの目次サイズが一致しません');
+ return result;
+}
+
+// 切り出した一時BlobはIndexedDBへ渡さず、検査したバイト列だけを返す。
+export async function readZipEntryBytes(file,{offset,size,crc:expectedCrc}){
+ const bytes=await file.slice(offset,offset+size).arrayBuffer();
+ if(bytes.byteLength!==size)throw new Error('ZIP内の記録と実際のバイト数が一致しません');
+ const crc=accumulateCrc(0xffffffff,new Uint8Array(bytes));
+ if(((crc^0xffffffff)>>>0)!==expectedCrc)throw new Error('ZIP内のデータが破損しています');
+ return bytes;
+}
+
+export async function readZip(file){
+ const entries=await readZipDirectory(file);
+ const result=new Map();
+ for(const [name,entry] of entries){
+  const data=file.slice(entry.offset,entry.offset+entry.size);
+  if(await crc32(data)!==entry.crc)throw new Error('ZIP内のデータが破損しています');
+  result.set(name,data);
+ }
  return result;
 }
