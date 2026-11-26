@@ -1,0 +1,12 @@
+:root{font-family:system-ui,sans-serif;color:#292521;background:#f7f5f1}
+body{margin:0}
+main{max-width:760px;margin:auto;padding:20px}
+h1{font-size:1.45rem}
+dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:12px}
+dt{font-weight:700}
+dd{margin:0;overflow-wrap:anywhere}
+dd label{display:block}
+button,select{min-height:44px;max-width:100%;font:inherit;color:inherit;background:#fff;border:1px solid #a69c90;border-radius:8px;padding:6px 10px}
+button:disabled,select:disabled{opacity:.55}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+textarea{display:block;box-sizing:border-box;width:100%;margin-top:8px;padding:10px;background:#fff;color:inherit;border:1px solid #a69c90;border-radius:8px;font:16px/1.5 monospace}

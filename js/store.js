@@ -171,3 +171,36 @@ export function parseLegacyJson(text,skinIds){
  ]);
  return convertLegacy({...input,version:1,images:Object.fromEntries(entries)},skinIds);
 }
+
+// 診断用。通常の起動処理と分け、空のDBを作るトランザクションも中止する。
+export async function readSavedProjectsForDiagnosis(){
+ const db=await new Promise((resolve,reject)=>{
+  const request=indexedDB.open(DB_NAME);
+  let absent=false;
+  request.onupgradeneeded=()=>{
+   absent=true;
+   request.transaction.abort();
+  };
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>absent?resolve(null):reject(request.error);
+ });
+ if(!db)return {projects:[],activeId:null};
+ try{
+  if(!db.objectStoreNames.contains(STORE))return {projects:[],activeId:null};
+  return await new Promise((resolve,reject)=>{
+   const tx=db.transaction(STORE,'readonly'),store=tx.objectStore(STORE);
+   const current=store.get(COLLECTION_KEY),legacy=store.get(LEGACY_KEY);
+   tx.onabort=()=>reject(tx.error??new Error('保存データの読み出しが中断されました'));
+   tx.oncomplete=()=>{
+    if(current.result!==undefined){
+     if(!Array.isArray(current.result?.projects)){
+      reject(new Error('保存された作品一覧の形式を確認できません'));return;
+     }
+     resolve({projects:current.result.projects,activeId:current.result.activeId});
+    }else if(legacy.result){
+     resolve({projects:[{id:'legacy',name:'旧形式の作品',images:legacy.result.images}],activeId:'legacy'});
+    }else resolve({projects:[],activeId:null});
+   };
+  });
+ }finally{db.close();}
+}
