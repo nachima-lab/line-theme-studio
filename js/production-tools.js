@@ -13,6 +13,8 @@ export function setupProductionTools(setImage){
  const tolerance=byId('production-tolerance');
  const thresholdField=byId('production-threshold-field');
  const threshold=byId('production-threshold');
+ const thresholdValue=byId('production-threshold-value');
+ const toleranceValue=byId('production-tolerance-value');
  const preview=byId('production-draft');
  const message=byId('production-draft-status');
  const previewButton=byId('production-preview-draft');
@@ -58,6 +60,8 @@ export function setupProductionTools(setImage){
   clearDraft();
   refreshControls();
   message.textContent='';
+  thresholdValue.value=threshold.value;
+  toleranceValue.value=tolerance.value;
  }
 
  kind.addEventListener('change',()=>{refreshSlots();invalidate();});

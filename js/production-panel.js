@@ -124,18 +124,24 @@ export function setupProductionPanel({save,setImage}){
   feedback.textContent='キャラ表を取り外しました。';
  });
 
- return function render(next){
+ return function render(next,reopened=false){
   const old=project;
   project=next;
   tools(next);
+  if(reopened||old?.id!==next?.id)selection++;
   if(old?.id!==next?.id){
-   selection++;
    feedback.textContent='';
    newColor.value='';
    copyField.hidden=true;
    copyField.value='';
   }
-  if(!next)return;
+  if(!next){
+   if(url)URL.revokeObjectURL(url);
+   url=null;
+   thumbnail.removeAttribute('src');
+   thumbnail.hidden=remove.hidden=true;
+   return;
+  }
   const p=next.production,last=old?.production;
   if(old?.id!==next.id||last?.colors!==p.colors)renderColors(p.colors);
   if(style.value!==p.style)style.value=p.style;

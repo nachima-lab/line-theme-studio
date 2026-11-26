@@ -243,7 +243,7 @@ function renderCollection(){
  if(project)chooseSkin(project.skinId,false);
  renderExport(project);
  extraPreviews.renderProject(project);
- renderProduction(project);
+ renderProduction(project,true);
  showBackground();
  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
 }
