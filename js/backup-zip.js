@@ -14,7 +14,7 @@ export async function exportZip(collection,skinIds){
  const clean=validateCollection(collection,skinIds),entries=[];
  function pack(item,base,label){
   const ext=mimeToExt.get(item.blob.type);
-  if(!ext)throw new Error('対応していない画像形式です: '+item.name);
+  if(!ext)throw new Error(label+'：対応していない画像形式です（'+item.name+'）');
   const path=base+'.'+ext;
   entries.push({name:path,data:item.blob,label});
   return {path,name:item.name,type:item.blob.type};
@@ -36,6 +36,7 @@ export async function exportZip(collection,skinIds){
  const checked=new Set();
  for(const {data,label} of entries){
   if(checked.has(data))continue;
+  if(!data.size)throw new Error(label+'：原画データが0バイトです');
   try{await verifyOriginal(data);}
   catch{throw new Error(label+'：原画データを読み取れないか、画像形式を解釈できません');}
   checked.add(data);

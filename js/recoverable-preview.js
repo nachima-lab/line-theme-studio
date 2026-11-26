@@ -53,6 +53,7 @@ export function createRecoverablePreview({label,attach,report,background=false,s
    return;
   }
   current.state='diagnosing';
+  current.retryAfterDiagnosis=false;
   release();
   attach(null);
   repairs=repairs.then(async()=>{
@@ -69,6 +70,8 @@ export function createRecoverablePreview({label,attach,report,background=false,s
    if(frame!==current)return;
    current.state='failed';
    report('「'+current.projectName+'」の'+label+'：'+reason+'。');
+   if(current.retryAfterDiagnosis)retry();
+
   });
  }
 
@@ -82,6 +85,7 @@ export function createRecoverablePreview({label,attach,report,background=false,s
  }
 
  function retry(){
+  if(frame?.state==='diagnosing'){frame.retryAfterDiagnosis=true;return;}
   if(frame?.state==='failed')attempt(frame,frame.item.blob,true);
  }
  return {show,retry};

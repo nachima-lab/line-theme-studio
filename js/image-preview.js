@@ -45,14 +45,16 @@ export async function verifyOriginalBytes(blob){
 
 export async function verifyOriginal(blob){
  if(!blob.size)throw new Error('原画が0バイトです');
- const image=new Image(),url=URL.createObjectURL(blob);
+ const image=new Image();
+ let url;
  try{
+  url=URL.createObjectURL(blob);
   image.src=url;
   await image.decode();
  }catch{
   await verifyOriginalBytes(blob);
  }finally{
   image.removeAttribute('src');
-  URL.revokeObjectURL(url);
+  if(url)URL.revokeObjectURL(url);
  }
 }
