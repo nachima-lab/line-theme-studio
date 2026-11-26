@@ -6,6 +6,7 @@ import {makeWorkingPreview} from './image-preview.js';
 import {setupExportPanel} from './export-panel.js';
 import {setupPreviewTabs} from './preview-tabs.js';
 import {setupExtraPreviews} from './extra-previews.js';
+import {setupProductionPanel} from './production-panel.js';
 
 let skins=[],skinIds=[],collection,revision,backgroundUrl;
 let saveQueue=Promise.resolve(),imageQueue=Promise.resolve();
@@ -14,7 +15,7 @@ const groupsEl=document.getElementById('skin-groups');
 const assetSlotsEl=document.getElementById('asset-slots');
 const menuSlotsEl=document.getElementById('menu-slots');
 const main=document.querySelector('main');
-const editors=main.querySelectorAll('.preview-section,.assets-section,.picker-section');
+const editors=main.querySelectorAll('.preview-section,.assets-section,.picker-section,.production-section');
 const assetViews=new Map(),pendingImages=new Map();
 const statusEl=document.getElementById('save-status');
 const input=document.getElementById('background-input');
@@ -29,6 +30,7 @@ const renameButton=document.getElementById('rename-project');
 const deleteButton=document.getElementById('delete-project');
 setupPreviewTabs();
 const extraPreviews=setupExtraPreviews();
+const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
 const renderExport=setupExportPanel({
  saveSettings:exportSettings=>updateProject({exportSettings}),runOperation
 });
@@ -106,6 +108,7 @@ function updateProject(changes){
  queueSave();
  renderExport(updated);
  extraPreviews.renderProject(updated);
+ renderProduction(updated);
 }
 
 function showBackground(){
@@ -118,11 +121,16 @@ function showBackground(){
  removeButton.hidden=!item;
 }
 
-function setImage(slotId,item){
- const images={...activeProject().images};
+function setImage(slotId,item,rememberOriginal=false){
+ pendingImages.delete(slotId);
+ const project=activeProject();
+ const images={...project.images};
+ const undo={...project.production.undo};
+ if(rememberOriginal&&images[slotId])undo[slotId]=images[slotId];
+ else delete undo[slotId];
  if(item)images[slotId]=item;
  else delete images[slotId];
- updateProject({images});
+ updateProject({images,production:{...project.production,undo}});
  if(slotId==='talkBackground')showBackground();
  else renderAssetSlot(slotId);
 }
@@ -235,6 +243,7 @@ function renderCollection(){
  if(project)chooseSkin(project.skinId,false);
  renderExport(project);
  extraPreviews.renderProject(project);
+ renderProduction(project);
  showBackground();
  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
 }
