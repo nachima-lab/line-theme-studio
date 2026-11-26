@@ -3,7 +3,7 @@ const enc=new TextEncoder(),dec=new TextDecoder('utf-8',{fatal:true});
 const MAX_FILES=65534,MAX_ENTRY=80*1024*1024,MAX_TOTAL=300*1024*1024;
 const MAX_OVERHEAD=16*1024*1024,CHUNK=1024*1024;
 const crcTable=Uint32Array.from({length:256},(_,n)=>{let c=n;for(let j=0;j<8;j++)c=c&1?0xedb88320^(c>>>1):c>>>1;return c>>>0;});
-async function crc32(blob){
+export async function crc32(blob){
  let crc=0xffffffff;
  for(let offset=0;offset<blob.size;offset+=CHUNK){
   const bytes=new Uint8Array(await blob.slice(offset,offset+CHUNK).arrayBuffer());

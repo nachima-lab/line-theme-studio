@@ -1,4 +1,5 @@
 import {adjustment,cropBounds,PNG_LIMIT} from './export-spec.js';
+import {indexedPng} from './indexed-png.js';
 
 function canvas(width,height){
  const element=document.createElement('canvas');
@@ -189,14 +190,26 @@ async function checkedPng(context){
  const original=await encode(context);
  if(original.size<=PNG_LIMIT)return {blob:original,reduced:false};
  const {width,height}=context.canvas;
- const pixels=context.getImageData(0,0,width,height),source=new Uint8ClampedArray(pixels.data);
+ const pixels=context.getImageData(0,0,width,height);
+ const identity=Uint8Array.from({length:256},(_,i)=>i);
+ const lossless=await indexedPng(pixels,identity);
+ if(lossless?.size<=PNG_LIMIT)return {blob:lossless,reduced:false};
+
+ const adjusted=new ImageData(width,height);
+ adjusted.data.set(pixels.data);
  for(const levels of [32,16,8,4,2]){
   const quantize=Uint8Array.from({length:256},(_,i)=>Math.round(Math.round(i*(levels-1)/255)*255/(levels-1)));
-  for(let i=0;i<source.length;i+=4){
-   pixels.data[i]=quantize[source[i]];pixels.data[i+1]=quantize[source[i+1]];
-   pixels.data[i+2]=quantize[source[i+2]];
+  const indexed=await indexedPng(pixels,quantize);
+  if(indexed){
+   if(indexed.size<=PNG_LIMIT)return {blob:indexed,reduced:true};
+   continue;
   }
-  context.putImageData(pixels,0,0);
+  for(let i=0;i<pixels.data.length;i+=4){
+   adjusted.data[i]=quantize[pixels.data[i]];
+   adjusted.data[i+1]=quantize[pixels.data[i+1]];
+   adjusted.data[i+2]=quantize[pixels.data[i+2]];
+  }
+  context.putImageData(adjusted,0,0);
   const blob=await encode(context);
   if(blob.size<=PNG_LIMIT)return {blob,reduced:true};
  }
