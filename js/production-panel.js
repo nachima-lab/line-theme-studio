@@ -9,6 +9,7 @@ export function setupProductionPanel({save,setImage}){
  const list=id('production-colors');
  const newColor=id('production-new-color');
  const addColor=id('production-add-color');
+ const colorError=id('production-color-error');
  const style=id('production-style');
  const world=id('production-world');
  const templates=id('production-templates');
@@ -47,9 +48,10 @@ export function setupProductionPanel({save,setImage}){
  function setColor(input,index){
   const value=input.value.trim().toUpperCase();
   if(!HEX_COLOR.test(value)){
-   feedback.textContent='色コードを #RRGGBB で入力してください。';
+   colorError.textContent='色コードを #RRGGBB で入力してください。';
    return false;
   }
+  colorError.textContent='';
   const colors=[...project.production.colors];
   colors[index]=value;
   update({colors});
@@ -80,6 +82,12 @@ export function setupProductionPanel({save,setImage}){
   newColor.disabled=addColor.disabled=colors.length>=8;
  }
 
+ function clearColorError(){colorError.textContent='';}
+ newColor.addEventListener('input',clearColorError);
+ list.addEventListener('input',clearColorError);
+ colorError.closest('details').addEventListener('toggle',event=>{
+  if(!event.currentTarget.open)clearColorError();
+ });
  addColor.addEventListener('click',()=>{
   const index=project.production.colors.length;
   if(index<8&&setColor(newColor,index))newColor.value='';
@@ -138,6 +146,7 @@ export function setupProductionPanel({save,setImage}){
   if(reopened||old?.id!==next?.id)selection++;
   if(old?.id!==next?.id){
    feedback.textContent='';
+   clearColorError();
    newColor.value='';
    copyField.hidden=true;
    copyField.value='';
