@@ -1,12 +1,12 @@
 import {PART_FIELDS,parsePartSheet,validateDesign} from './design-sheet.js';
-import {imagePrompt,PART_LABELS} from './image-prompt.js';
+import {imagePrompt,PART_LABELS,hasPartDesign} from './image-prompt.js';
 
 const characterSlot={id:'characterSheet',label:'キャラ表'};
 export function setupPartPanel({slots,activeProject,commit}){
  const get=id=>document.getElementById('part-'+id);
  const dialog=get('dialog'),fields=get('fields'),status=get('status');
  const reference=get('reference'),referenceField=get('reference-field'),fallback=get('fallback');
- const copy=get('copy'),save=get('save');
+ const copy=get('copy'),copyRevision=get('copy-revision'),save=get('save');
  const ids=slots.map(slot=>slot.id);
  const controls=new Map();
  const importInput=get('import-input'),importReview=get('import-review'),importStatus=get('import-status');
@@ -41,7 +41,8 @@ export function setupPartPanel({slots,activeProject,commit}){
  }
  function update(){
   const part=session?.slot===characterSlot?undefined:draft();
-  const blank=session?.slot!==characterSlot&&!part;
+  const blank=session?.slot!==characterSlot&&!hasPartDesign(part);
+  copyRevision.hidden=session?.slot===characterSlot||!hasPartDesign(session?.saved);
   copy.textContent=blank?'この枠の相談文をコピー':'画像生成の指示文をコピー';
   get('characters').hidden=get('character-selection').value!=='specified';
   referenceField.hidden=session?.slot===characterSlot||!session?.project.production.characterSheet||part?.characterIds?.length===0;
@@ -161,16 +162,17 @@ export function setupPartPanel({slots,activeProject,commit}){
    else status.textContent=error?.message??'個別設計を保存できませんでした。';
   });
  });
- copy.addEventListener('click',async()=>{
+ async function copyPrompt(revise){
   if(!session)return;
   fallback.hidden=true;
   status.textContent='';
   try{
    const project=activeProject();
    if(project?.id!==session.project.id)throw new Error('対象の作品を開き直してください。');
-   const part=session.slot===characterSlot?undefined:draft();
-   const source=session.slot===characterSlot?project:withPart(project,session.slot.id,part);
-   const result=imagePrompt(source,session.slot,{part,useReference:!referenceField.hidden&&reference.checked});
+   const part=revise?project.production.design?.parts[session.slot.id]:session.slot===characterSlot?undefined:draft();
+   if(revise&&!hasPartDesign(part))throw new Error('保存済みの個別設計がありません。');
+   const source=revise||session.slot===characterSlot?project:withPart(project,session.slot.id,part);
+   const result=imagePrompt(source,session.slot,{part,revise,useReference:reference.checked&&(revise||!referenceField.hidden)});
    const attach=result.reference?' ChatGPTで「'+project.production.characterSheet.name+'」を添付してください。':'';
    try{
     await navigator.clipboard.writeText(result.text);
@@ -182,7 +184,9 @@ export function setupPartPanel({slots,activeProject,commit}){
     status.textContent='選択した指示文を手動でコピーしてください。'+attach;
    }
   }catch(error){status.textContent=error.message;}
- });
+ }
+ copy.addEventListener('click',()=>copyPrompt(false));
+ copyRevision.addEventListener('click',()=>copyPrompt(true));
 
  document.getElementById('design-character-prompt').addEventListener('click',event=>open(characterSlot,event.currentTarget));
  return ()=>{

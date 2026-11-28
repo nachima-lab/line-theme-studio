@@ -17,7 +17,12 @@ export const PART_LABELS={
  motifs:'この枠で使うモチーフ',characterIds:'この枠に登場するキャラクター'
 };
 
-export function imagePrompt(project,slot,{part=project.production.design?.parts[slot.id],useReference=false}={}){
+export function hasPartDesign(part){
+ return Object.entries(part??{}).some(([key,value])=>
+  key==='characterIds'||(Array.isArray(value)?value.length>0:Boolean(value?.trim())));
+}
+
+export function imagePrompt(project,slot,{part=project.production.design?.parts[slot.id],useReference=false,revise=false}={}){
  const {production:p}=project;
  const type=templateForSlot(slot.id);
  const template=key=>TEMPLATES.find(([id])=>id===key);
@@ -41,10 +46,15 @@ export function imagePrompt(project,slot,{part=project.production.design?.parts[
  }
  const common=expand('common',template('common')[2]);
  const typed=expand(type,initial);
- const consultation=type!=='character'&&!part;
- texts.push(consultation
-  ?slot.label+'（枠ID: '+slot.id+'）の個別設計を相談したいです。まだ画像は生成せず、構図・配置などの案を提案してください。'
-  :slot.label+'の原画を作成してください。');
+ const configured=hasPartDesign(part);
+ const revision=type!=='character'&&revise&&configured;
+ const consultation=type!=='character'&&(revision||!configured);
+ const target=slot.label+'（枠ID: '+slot.id+'）';
+ texts.push(revision
+  ?target+'の保存済み個別設計をもとに、変更したい項目だけを相談したいです。ほかの項目は維持し、まだ画像は生成しないでください。'
+  :consultation
+   ?target+'の個別設計を相談したいです。まだ画像は生成せず、構図・配置などの案を提案してください。'
+   :slot.label+'の原画を作成してください。');
  const context=Object.entries(templateValues(p)).filter(([label,value])=>value.trim()&&!shown.has(label))
   .map(([label,value])=>label+'：'+value);
  const reference=Boolean(useReference&&p.characterSheet&&type!=='character'&&part?.characterIds?.length!==0);
@@ -59,19 +69,32 @@ export function imagePrompt(project,slot,{part=project.production.design?.parts[
  texts.push('【共通設計】\n作品：'+project.name+(context.length?'\n'+context.join('\n'):'')+(common?'\n'+common:''));
  texts.push('【型テンプレート：'+typeLabel+'】'+(typed?'\n'+typed:''));
  if(type!=='character'){
-  const details=Object.entries(PART_LABELS).flatMap(([key,label])=>{
-   if(key==='characterIds')return part?.characterIds?.length===0?['この枠にキャラクターは登場させない。']:[];
-   const value=key==='motifs'?quoteMotifs(part?.motifs?.filter(motif=>!commonMotifs.includes(motif))):part?.[key];
-   return value?.trim()?[label+'：'+value]:[];
-  });
-  texts.push('【個別設計：'+slot.label+'】'+(details.length?'\n'+details.join('\n'):''));
+  if(!configured)texts.push('個別設計は未設定です。');
+  else{
+   const details=Object.entries(PART_LABELS).flatMap(([key,label])=>{
+    if(key==='characterIds'){
+     if(part.characterIds?.length===0)return ['この枠にキャラクターは登場させない。'];
+     if(revision&&part.characterIds){
+      return [label+'：'+characters.map(character=>character.name+'（'+character.id+'）').join('、')];
+     }
+     return [];
+    }
+    const value=key==='motifs'
+     ?quoteMotifs(revision?part.motifs:part.motifs?.filter(motif=>!commonMotifs.includes(motif)))
+     :part[key];
+    return value?.trim()?[label+'：'+value]:[];
+   });
+   if(details.length)texts.push('【個別設計：'+slot.label+'】\n'+details.join('\n'));
+  }
  }
  if(consultation){
   const examples={composition:'構図',characterIds:all.slice(0,1).map(character=>character.id),motifs:['モチーフ'],
    placement:'配置',expression:'表情',stateNotes:'OFF／ONの違い'};
   const format=JSON.stringify({sheetVersion:1,parts:{[slot.id]:examples}});
   texts.push('相談がまとまり、私が了承したら、次の形式のJSONだけを出力してください。枠IDは変更せず、未決定の項目は省略できます。'
-   +' characterIds には既存のIDだけを使い、共通設計に合わせる場合は省略し、登場させない場合は空配列にしてください。'
+   +(revision?' 変更が決まった項目だけを出力してください。':'')
+   +' characterIds には既存のIDだけを使い、登場させない場合は空配列にしてください。'
+   +(revision?'':' 共通設計に合わせる場合は characterIds を省略してください。')
    +(all.length?' 使用できるID：'+all.map(character=>character.id+'（'+character.name+'）').join('、'):'')
    +'\n'+format);
  }
