@@ -44,8 +44,8 @@ test('1枠のJSONを確認・更新し、他の設計や原画を保持する',a
   });
   await main.locator('.part-open').tap();
   assert.equal(await find('part-copy-revision').isVisible(),false);
-  assert.match(await find('part-copy').textContent(),/この枠の相談文/);
-  await find('part-copy').tap();
+  assert.match(await find('part-copy-consultation').textContent(),/この枠の相談文/);
+  await find('part-copy-consultation').tap();
   await wait(page,'part-status','コピーしました');
   const newPrompt=await page.evaluate(()=>window.clipboardWritten);
   assert.match(newPrompt,/"sheetVersion":1,"parts":\{"mainImage"/);
@@ -94,12 +94,13 @@ test('1枠のJSONを確認・更新し、他の設計や原画を保持する',a
   assert.ok(!(await page.evaluate(()=>window.writes)).includes('image_blobs_v2'));
   await page.reload();
   await wait(page,'save-status','自動保存が有効');
-  await find('workflow-create').tap();
   if(!process.env.TEST_WEBKIT)assert.match(await main.innerText(),/keep.png/);
-  await main.locator('.part-open').tap();
+  assert.equal(await page.getByLabel('構図',{exact:true}).inputValue(),'未保存の構図');
+  page.once('dialog',dialog=>dialog.accept());
+  await find('part-discard').tap();
   assert.equal(await page.getByLabel('構図',{exact:true}).inputValue(),'小さな星');
   assert.equal(await find('part-copy-revision').isVisible(),true);
-  await find('part-close').tap();
+  await find('part-back').tap();
   await page.locator('[data-slot="talkBackground"] .part-open').tap();
   assert.equal(await page.getByLabel('構図',{exact:true}).inputValue(),'月は右上');
  }finally{await browser.close();}

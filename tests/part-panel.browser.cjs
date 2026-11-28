@@ -32,7 +32,7 @@ test('個別設計を編集・保存・再表示し、相談文とキャラ表�
   assert.equal(await page.locator('.part-open').count(),25);
   const card=page.locator('[data-slot="talkBackground"]');
   await card.locator('.part-open').click();
-  await find('part-copy').click();
+  await find('part-copy-consultation').click();
   await wait(page,'part-status','コピーしました');
   assert.match(await clipboard(),/まだ画像は生成せず/);
   assert.match(await clipboard(),/青い帽子/);
@@ -48,14 +48,13 @@ test('個別設計を編集・保存・再表示し、相談文とキャラ表�
   assert.match(await clipboard(),/キャラクターは登場させない/);
   assert.doesNotMatch(await clipboard(),/reference.png/);
   await find('part-save').click();
-  await find('part-dialog').waitFor({state:'hidden'});
+  await wait(page,'part-status','個別設計を保存しました');
   await page.reload();
   await wait(page,'save-status','自動保存が有効');
-  await find('workflow-create').click();
-  await card.locator('.part-open').click();
+  await find('part-workspace').waitFor({state:'visible'});
   assert.equal(await page.getByLabel('構図',{exact:true}).inputValue(),'上半分に余白');
   assert.equal(await find('part-character-selection').inputValue(),'specified');
-  await find('part-close').click();
+  await find('part-back').click();
   await find('background-input').setInputFiles({...file,name:'background.png'});
   await wait(page,'background-status','background.png');
   await wait(page,'save-status','自動保存済み');

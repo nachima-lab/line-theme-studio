@@ -106,6 +106,7 @@
 </section>
 </div>
 <div class="workflow-panel" id="workflow-panel-create" role="tabpanel" aria-labelledby="workflow-create" hidden>
+<div id="part-list-screen">
 <nav class="workflow-shortcuts" hidden aria-label="この工程の項目"><a href="#picker-title">カラースキン</a><a href="#assets-heading">原画スロット</a><a href="#production-tools">加工補助</a></nav>
 <section class="picker-section" aria-label="カラースキン一覧" hidden><div class="picker-title" id="picker-title"><h2>カラースキン</h2><p>9系統・全50種類。タップするとプレビューが切り替わります。</p></div><label class="skin-filter-label" for="skin-filter">色の系統</label> <select id="skin-filter"><option value="">すべての系統</option></select><div id="skin-groups" class="skin-groups"></div></section>
 <section class="assets-section" aria-labelledby="assets-heading" hidden>
@@ -127,6 +128,8 @@
   <div id="menu-slots" class="menu-pairs"></div>
  </details>
 </section>
+</div>
+<section id="part-workspace" aria-label="画像枠の制作" hidden></section>
 <section class="production-section" id="production-tools" hidden> <details>
   <summary>原画の加工補助</summary>
   <label>加工方法
@@ -239,8 +242,20 @@
  </div>
 </section>
 </div>
-<dialog id="part-dialog" aria-labelledby="part-heading">
- <h2 id="part-heading"></h2>
+<dialog id="part-dialog" aria-labelledby="part-heading"></dialog>
+<section id="part-editor" aria-labelledby="part-heading" hidden>
+ <button type="button" id="part-back">制作リストへ戻る</button>
+ <h2 id="part-heading" tabindex="-1"></h2>
+ <p id="part-next-action" role="status"></p>
+ <p id="part-draft-status" role="status"></p>
+ <details id="part-conflict" hidden><summary>現在保存されている内容</summary><ul id="part-saved-values"></ul></details>
+ <button type="button" id="part-rebase" hidden>保存内容を確認して下書きを続ける</button>
+ <button type="button" id="part-discard" hidden>この枠の下書きを破棄</button>
+ <div class="production-controls" id="part-consultation">
+  <button type="button" id="part-copy-consultation">この枠の相談文をコピー</button>
+  <button type="button" id="part-copy-revision" hidden>この枠の修正相談文をコピー</button>
+  <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く</a>
+ </div>
  <details id="part-import">
   <summary>個別設計JSONを取り込む</summary>
   <label for="part-import-input">ChatGPTから受け取った1枠分の設計</label>
@@ -265,10 +280,15 @@
  <div class="production-controls">
   <button type="button" id="part-save">個別設計を保存</button>
   <button type="button" id="part-copy">画像生成の指示文をコピー</button>
-  <button type="button" id="part-copy-revision" hidden>この枠の修正相談文をコピー</button>
   <button type="button" id="part-close">閉じる</button>
  </div>
  <p id="part-status" role="status"></p>
  <textarea id="part-fallback" aria-label="手動でコピーする指示文" rows="5" readonly hidden></textarea>
-</dialog>
+ <div id="part-image-section">
+  <h3>画像を登録・差し替え</h3>
+  <div id="part-image-card"></div>
+  <p id="part-image-save-status"></p>
+ </div>
+ <button type="button" id="part-next-slot">次の枠へ</button>
+</section>
 </main><script type="module" src="./js/app.js"></script></body></html>

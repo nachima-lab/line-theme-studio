@@ -37,7 +37,8 @@ test('キャラ表なしで始め、原画の続き・作り直し・色替え�
   await wait(page,'workflow-next','メニューアイコン トーク OFF');
   await stage('create');
   await find('production-recommendation-jump').click();
-  assert.equal(await card('menu-talk-off').evaluate(el=>el===document.activeElement),true);
+  assert.match(await find('part-heading').textContent(),/トーク OFF/);
+  await find('part-back').click();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),320);
   await upload('profileGroup','group.png');
   await wait(page,'progress-images','1/25');
@@ -52,7 +53,8 @@ test('キャラ表なしで始め、原画の続き・作り直し・色替え�
   await wait(page,'workflow-next','プロフィール グループを作り直し');
   await stage('create');
   await find('production-recommendation-jump').click();
-  assert.equal(await card('profileGroup').evaluate(el=>el===document.activeElement),true);
+  assert.match(await find('part-heading').textContent(),/プロフィール グループ/);
+  await find('part-back').click();
   assert.match(await card('profileGroup').innerText(),/group.png/);
   const refused=page.waitForEvent('dialog');
   await card('profileGroup').locator('input[type=file]').setInputFiles({
@@ -86,9 +88,9 @@ test('キャラ表なしで始め、原画の続き・作り直し・色替え�
   await find('preview-source-slot').selectOption('menu-talk-on');
   await find('preview-source-jump').click();
   assert.equal(await find('workflow-create').getAttribute('aria-selected'),'true');
-  assert.equal(await card('menu-talk-on').evaluate(el=>el===document.activeElement),true);
-  assert.ok(await card('menu-talk-on').evaluate(el=>
-   el.getBoundingClientRect().top>=document.querySelector('.workflow-bar').getBoundingClientRect().bottom));
+  assert.match(await find('part-heading').textContent(),/トーク ON/);
+  await find('part-back').click();
+  assert.equal(await card('menu-talk-on').locator('.part-open').evaluate(el=>el===document.activeElement),true);
   await stage('prepare');
   await find('production-character-input').setInputFiles(file('character.png'));
   await wait(page,'progress-sheet','登録済み');

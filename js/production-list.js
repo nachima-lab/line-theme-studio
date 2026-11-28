@@ -2,15 +2,15 @@ import {IMAGE_SLOTS} from './store.js';
 
 const menuOff=id=>/^menu-.+-off$/.test(id);
 
-export function nextImage(project){
+export function nextImage(project,exclude){
  const {images,production:{design}}=project;
- const redo=IMAGE_SLOTS.find(slot=>images[slot.id]&&design?.redo.includes(slot.id));
+ const redo=IMAGE_SLOTS.find(slot=>slot.id!==exclude&&images[slot.id]&&design?.redo.includes(slot.id));
  if(redo)return {...redo,redo:true};
- const missing=IMAGE_SLOTS.filter(slot=>!images[slot.id]);
+ const missing=IMAGE_SLOTS.filter(slot=>slot.id!==exclude&&!images[slot.id]);
  return missing.find(slot=>Object.keys(design?.parts[slot.id]??{}).length>0)??missing[0];
 }
 
-export function setupProductionList({openStage,selectColorSource,toggleRedo}){
+export function setupProductionList({selectColorSource,toggleRedo,openPart}){
  const cards=new Map();
  const recommendation=document.getElementById('production-recommendation');
  const jump=document.getElementById('production-recommendation-jump');
@@ -22,16 +22,8 @@ export function setupProductionList({openStage,selectColorSource,toggleRedo}){
   element.focus({preventScroll:true});
   element.scrollIntoView({block:'start'});
  }
- function goToSlot(id){
-  const card=cards.get(id)?.card;
-  if(!card)return;
-  openStage('create',false);
-  const group=card.closest('details');
-  if(group)group.open=true;
-  focusTarget(card);
- }
- jump.addEventListener('click',()=>{if(suggested)goToSlot(suggested.id);});
- previewJump.addEventListener('click',()=>goToSlot(previewSlot.value));
+ jump.addEventListener('click',()=>{if(suggested)openPart(suggested.id);});
+ previewJump.addEventListener('click',()=>openPart(previewSlot.value));
 
  function init(){
   for(const {id,label} of IMAGE_SLOTS){

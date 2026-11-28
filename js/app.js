@@ -1,4 +1,4 @@
-import {setupProductionList} from './production-list.js';
+import {setupProductionList,nextImage} from './production-list.js';
 import {setupPartPanel} from './part-panel.js';
 import {setupDesignPanel} from './design-panel.js';
 import {setupSalesPanel} from './sales-panel.js';
@@ -25,6 +25,7 @@ const main=document.querySelector('main');
 const editors=main.querySelectorAll('.preview-section,.assets-section,.picker-section,.production-section:not(#design-panel),.workflow-shortcuts');
 const assetViews=new Map(),pendingImages=new Map();
 const statusEl=document.getElementById('save-status');
+const partImageStatus=document.getElementById('part-image-save-status');
 const input=document.getElementById('background-input');
 const chooseBackground=document.getElementById('choose-background');
 const removeButton=document.getElementById('remove-background');
@@ -40,8 +41,8 @@ const extraPreviews=setupExtraPreviews();
 const renderSales=setupSalesPanel({save:sales=>updateProject({sales})});
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
 const renderDesign=setupDesignPanel({slots:IMAGE_SLOTS,commit:commitDesign,canCopySaved:()=>!dirty&&!busy});
-const initPartButtons=setupPartPanel({slots:IMAGE_SLOTS,activeProject,commit:commitDesign});
-const productionList=setupProductionList({openStage,selectColorSource:renderProduction.selectColorSource,toggleRedo});
+const partPanel=setupPartPanel({slots:IMAGE_SLOTS,activeProject,commit:commitDesign,openStage,nextImage});
+const productionList=setupProductionList({openStage,selectColorSource:renderProduction.selectColorSource,toggleRedo,openPart:partPanel.openById});
 setupPreviewTabs(productionList.selectPreview);
 const renderProgress=setupWorkflowProgress();
 const renderExport=setupExportPanel({
@@ -69,6 +70,7 @@ document.addEventListener('visibilitychange',()=>{
 
 function status(message,error=false){
  statusEl.textContent=message;
+ partImageStatus.textContent=message;
  statusEl.classList.toggle('save-error',error);
 }
 
@@ -161,6 +163,7 @@ function updateProject(changes){
  renderProduction(updated);
  renderDesign(updated);
  productionList.render(updated);
+ partPanel.sync(updated);
  renderSales(updated,skins.find(s=>s.id===updated.skinId)?.displayName);
 }
 
@@ -331,6 +334,7 @@ function renderCollection(){
  renderProduction(project,true);
  renderDesign(project);
  productionList.render(project);
+ partPanel.sync(project);
  renderSales(project,skins.find(s=>s.id===project?.skinId)?.displayName);
  showBackground();
  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
@@ -354,9 +358,10 @@ async function init(){
   }
   ({collection,revision}=await loadCollection(skinIds));
   initAssetSlots();
-  initPartButtons();
+  partPanel.init();
   productionList.init();
   renderCollection();
+  partPanel.restore(activeProject());
   newButton.disabled=exportButton.disabled=chooseBackup.disabled=false;
   status('自動保存が有効です');
  }catch(error){
