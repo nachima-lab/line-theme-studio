@@ -1,3 +1,4 @@
+import {setupSalesPanel} from './sales-panel.js';
 import {loadSkins,groupedSkins,color} from './skins.js';
 import {renderPreview,renderBackground} from './preview.js';
 import {IMAGE_ACCEPT,IMAGE_SLOTS,createProject,defineCollection,loadCollection,saveCollection,parseLegacyJson} from './store.js';
@@ -31,6 +32,7 @@ const renameButton=document.getElementById('rename-project');
 const deleteButton=document.getElementById('delete-project');
 setupPreviewTabs();
 const extraPreviews=setupExtraPreviews();
+const renderSales=setupSalesPanel({save:sales=>updateProject({sales})});
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
 const renderExport=setupExportPanel({
  saveSettings:exportSettings=>updateProject({exportSettings}),runOperation
@@ -129,6 +131,7 @@ function updateProject(changes){
  renderExport(updated);
  extraPreviews.renderProject(updated);
  renderProduction(updated);
+ renderSales(updated,skins.find(s=>s.id===updated.skinId)?.displayName);
 }
 
 function savePreviewRepair(slotId,projectId,item,preview){
@@ -267,6 +270,7 @@ function renderCollection(){
  renderExport(project);
  extraPreviews.renderProject(project);
  renderProduction(project,true);
+ renderSales(project,skins.find(s=>s.id===project?.skinId)?.displayName);
  showBackground();
  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
 }

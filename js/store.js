@@ -1,3 +1,4 @@
+import {emptySales,readSales} from './sales.js';
 import {createSplitStorage} from './split-storage.js';
 import {readAdjustments} from './export-spec.js';
 import {emptyProduction,HEX_COLOR,TEMPLATES} from './production-data.js';
@@ -23,8 +24,9 @@ export const IMAGE_SLOTS=[
 export const LEGACY_SLOT_IDS=['talkBackground','mainImage','menuIcon'];
 export const COLLECTION_VERSION=2;
 
-export function createProject(name){
- return {id:crypto.randomUUID(),name,skinId:'beige_01',images:{},production:emptyProduction()};
+export function createProject(name,{sales=true}={}){
+ return {id:crypto.randomUUID(),name,skinId:'beige_01',images:{},production:emptyProduction(),
+  ...(sales?{sales:{...emptySales(),coins:150,includesJapan:true}}:{})};
 }
 
 export function defineCollection(projects,activeId){
@@ -74,7 +76,7 @@ export function validateCollection(record,skinIds){
   ids.add(project.id);
   const slots=IMAGE_SLOTS.map(slot=>slot.id);
   const images=checkedImages(project.images,slots);
-  return {...project,exportSettings:readAdjustments(project.exportSettings),images,
+  return {...project,...(project.sales===undefined?{}:{sales:readSales(project.sales)}),exportSettings:readAdjustments(project.exportSettings),images,
    production:validateProduction(project.production,images,slots)};
  });
  if(projects.length?!ids.has(record.activeId):record.activeId!==null){
@@ -91,7 +93,7 @@ export function convertLegacy(project,skinIds){
   images['menu-talk-off']=images.menuIcon;
   delete images.menuIcon;
  }
- return {...createProject('引き継いだ作品'),skinId:project.skinId,images};
+ return {...createProject('引き継いだ作品',{sales:false}),skinId:project.skinId,images};
 }
 
 function dataUrlToBlob(value){

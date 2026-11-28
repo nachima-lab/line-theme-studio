@@ -108,3 +108,8 @@
 .production-swatch::before{content:'';display:inline-block;width:1em;height:1em;vertical-align:middle;margin-right:6px;border:1px solid #837a70;border-radius:4px;background:var(--swatch)}
 #production-character-image img,#production-draft{display:block;max-width:100%;max-height:360px;object-fit:contain}
 #production-draft{background:repeating-conic-gradient(#dedbd6 0 25%,#fff 0 50%) 0 0/20px 20px}
+
+.sales-field{margin:12px 0}
+.sales-field input,.sales-field textarea{display:block;width:100%;max-width:100%}
+#sales-section input[type=text]{width:100%;box-sizing:border-box;padding:8px}
+#sales-required{color:#8f3024}

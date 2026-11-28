@@ -3,7 +3,7 @@ import {writeZip,readZipDirectory,readZipEntryBytes} from './zip.js';
 import {detectImageMime} from './image-format.js';
 import {verifyOriginal} from './image-preview.js';
 
-const FORMAT='line-theme-studio-zip',BACKUP_VERSION=3;
+const FORMAT='line-theme-studio-zip',BACKUP_VERSION=4;
 const mimeToExt=new Map([
  ['image/png','png'],['image/jpeg','jpg'],['image/webp','webp'],['image/heic','heic'],['image/heif','heif']
 ]);
@@ -40,7 +40,7 @@ export async function exportZip(collection,skinIds,{omitted=[]}={}){
    return null;
   }
  }
- for(const [index,{id,name,skinId,images,exportSettings,production}] of clean.projects.entries()){
+ for(const [index,{id,name,skinId,images,exportSettings,production,sales}] of clean.projects.entries()){
   const packed={},undo={};
   for(const [slot,item] of Object.entries(images)){
    const label='「'+name+'」の'+slotLabels.get(slot);
@@ -58,7 +58,7 @@ export async function exportZip(collection,skinIds,{omitted=[]}={}){
   }
   const sheet=production.characterSheet;
   const sheetBlob=sheet?await readable(sheet,'「'+name+'」のキャラ表'):null;
-  projects.push({id,name,skinId,exportSettings,images:packed,production:{...production,undo,
+  projects.push({id,name,skinId,exportSettings,sales,images:packed,production:{...production,undo,
    characterSheet:sheetBlob?pack(sheetBlob,sheet.name,'references/'+index+'/character-sheet'):null}});
  }
  const meta={...clean,version:BACKUP_VERSION,format:FORMAT,exportedAt:new Date().toISOString(),projects};
@@ -123,13 +123,13 @@ export async function importZip(file,skinIds){
   const old=meta.project;
   const images=await restoreImages(old?.images,LEGACY_SLOT_IDS,'images/',entries,file,'旧形式の作品');
   result={legacy:convertLegacy({...old,version:1,images},skinIds)};
- }else if([2,BACKUP_VERSION].includes(meta.version)&&Array.isArray(meta.projects)){
+ }else if([2,3,BACKUP_VERSION].includes(meta.version)&&Array.isArray(meta.projects)){
   const projects=[];
   for(const [index,project] of meta.projects.entries()){
    const label='「'+(project?.name??'名称不明の作品')+'」';
    const images=await restoreImages(project?.images,slotIds,'images/'+index+'/',entries,file,label);
    let production;
-   if(meta.version===BACKUP_VERSION){
+   if(meta.version>=3){
     const data=project.production;
     if(!data||typeof data!=='object'||Array.isArray(data))throw new Error(label+'：制作メモの情報がありません');
     const sheet=data.characterSheet;
@@ -137,12 +137,12 @@ export async function importZip(file,skinIds){
     const undo=await restoreImages(data.undo,slotIds,'undo/'+index+'/',entries,file,label,'（取り消し用）');
     production={...data,characterSheet,undo};
    }
-   projects.push({...project,images,production});
+   projects.push({...project,images,production,sales:meta.version===BACKUP_VERSION?project.sales:undefined});
   }
   result={collection:validateCollection({...meta,version:COLLECTION_VERSION,projects},skinIds)};
  }else throw new Error('対応していないバックアップです');
  if(entries.size)throw new Error('想定外のファイルが含まれています');
- if(meta.version===BACKUP_VERSION&&Array.isArray(meta.omittedImages)&&meta.omittedImages.length){
+ if(meta.version>=3&&Array.isArray(meta.omittedImages)&&meta.omittedImages.length){
   result.partial=true;
  }
  return result;
