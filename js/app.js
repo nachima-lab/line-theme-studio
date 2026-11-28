@@ -1,6 +1,6 @@
 import {setupSalesPanel} from './sales-panel.js';
 import {setupWorkflowTabs} from './workflow-tabs.js';
-import {setupWorkflowProgress} from "./workflow-progress.js";
+import {setupWorkflowProgress} from './workflow-progress.js';
 import {loadSkins,groupedSkins,color} from './skins.js';
 import {renderPreview,renderBackground} from './preview.js';
 import {IMAGE_ACCEPT,IMAGE_SLOTS,createProject,defineCollection,loadCollection,saveCollection,parseLegacyJson} from './store.js';
@@ -16,10 +16,10 @@ let skins=[],skinIds=[],collection,revision;
 let saveQueue=Promise.resolve(),imageQueue=Promise.resolve();
 let dirty=false,busy=false,saveError=null;
 const groupsEl=document.getElementById('skin-groups');
-const assetSlotsEl=document.getElementById('asset-slots');
+
 const menuSlotsEl=document.getElementById('menu-slots');
 const main=document.querySelector('main');
-const editors=main.querySelectorAll('.preview-section,.assets-section,.picker-section,.production-section');
+const editors=main.querySelectorAll('.preview-section,.assets-section,.picker-section,.production-section,.workflow-shortcuts');
 const assetViews=new Map(),pendingImages=new Map();
 const statusEl=document.getElementById('save-status');
 const input=document.getElementById('background-input');
@@ -211,10 +211,24 @@ function renderAssetSlot(slotId){
 }
 
 function initAssetSlots(){
+ const surfaces=document.getElementById('asset-surfaces');
+ const passcode=document.getElementById('asset-passcode');
+ const profile=document.getElementById('asset-profile');
+ let menuPair;
  for(const slot of IMAGE_SLOTS){
   if(slot.id==='talkBackground')continue;
   const card=document.createElement('article');card.className='asset-card';card.dataset.slot=slot.id;
-  const heading=document.createElement('h3');heading.textContent=slot.label;
+  const menu=slot.id.startsWith('menu-');
+  if(menu&&slot.id.endsWith('-off')){
+   const pair=document.createElement('section');
+   pair.className='menu-pair';
+   const label=document.createElement('h3');
+   label.textContent=slot.label.replace(/^メニューアイコン /,'').replace(/ OFF$/,'');
+   menuPair=document.createElement('div');menuPair.className='menu-pair-cards';
+   pair.append(label,menuPair);menuSlotsEl.append(pair);
+  }
+  const heading=document.createElement('h4');
+  heading.textContent=menu?(slot.id.endsWith('-off')?'OFF':'ON'):slot.label;
   const preview=document.createElement('div');preview.className='asset-preview';
   const name=document.createElement('p');name.className='asset-filename';name.setAttribute('aria-live','polite');
   const controls=document.createElement('div');controls.className='asset-controls';
@@ -232,7 +246,8 @@ function initAssetSlots(){
 
   controls.append(upload,fileInput,remove);
   card.append(heading,preview,name,controls);
-  (slot.id.startsWith('menu-')?menuSlotsEl:assetSlotsEl).append(card);
+  const container=menu?menuPair:slot.id.startsWith('passcode')?passcode:slot.id.startsWith('profile')?profile:surfaces;
+  container.append(card);
   const display=createRecoverablePreview({
    label:slot.label,
    attach:image=>preview.replaceChildren(...(image?[image]:[])),
@@ -284,11 +299,16 @@ async function init(){
   skins=await loadSkins();
   skinIds=skins.map(skin=>skin.id);
   document.getElementById('skin-count').textContent=skins.length+'種類';
+  const skinFilter=document.getElementById('skin-filter');
+  skinFilter.addEventListener('change',()=>{
+   for(const section of groupsEl.children)section.hidden=Boolean(skinFilter.value)&&section.dataset.group!==skinFilter.value;
+  });
   for(const {group,skins:items} of groupedSkins(skins)){
+   skinFilter.add(new Option(group,group));
    const section=document.createElement('section');
    const heading=document.createElement('h3');heading.className='group-heading';heading.textContent=group+' ('+items.length+')';
    const grid=document.createElement('div');grid.className='tiles';grid.append(...items.map(tile));
-   section.append(heading,grid);groupsEl.append(section);
+   section.dataset.group=group;section.append(heading,grid);groupsEl.append(section);
   }
   ({collection,revision}=await loadCollection(skinIds));
   initAssetSlots();

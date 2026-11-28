@@ -54,7 +54,13 @@ async function restore(page,file){
  await status(page,'バックアップを復元しました');
 }
 
+async function stage(page,name){
+ const tab=page.locator('#workflow-'+name);
+ if(await tab.count())await tab.click();
+}
+
 async function checkTexts(page){
+ await stage(page,'apply');
  for(const [language,value] of Object.entries(samples)){
   await field(page,'language').selectOption(language);
   for(const [index,key] of fields.entries())assert.equal(await field(page,key).inputValue(),sample(value,index));
@@ -63,6 +69,7 @@ async function checkTexts(page){
 
 test('4言語の保存・正確なコピー・警告・画像書き込みなし・v4往復',()=>usingPage(async page=>{
  await open(page,base);
+ await stage(page,'apply');
  assert.equal(await field(page,'coins').inputValue(),'150');
  assert.equal(await field(page,'japan').inputValue(),'true');
  assert.match(await field(page,'required').textContent(),/英語の必須項目が未入力/);
@@ -102,6 +109,7 @@ test('4言語の保存・正確なコピー・警告・画像書き込みなし�
  await page.reload();
  await status(page,'自動保存が有効');
  await checkTexts(page);
+ await stage(page,'prepare');
  const download=page.waitForEvent('download');
  await page.locator('#export-backup').click();
  const buffer=await readFile(await (await download).path());
@@ -112,6 +120,7 @@ test('4言語の保存・正確なコピー・警告・画像書き込みなし�
   return JSON.parse(await entries.get('project.json').text()).version;
  },buffer.toString('base64'));
  assert.equal(version,4);
+ await stage(page,'apply');
  await field(page,'title').fill('復元前に変更');
  await saved(page);
  await restore(page,{name:'sales-v4.zip',mimeType:'application/zip',buffer});
@@ -134,6 +143,7 @@ test('7b1378bで作成した販売情報のない作品を同じ保存領域か�
  await saved(page);
  await open(page,base);
  assert.match(await page.locator(slot).innerText(),/legacy-main.png/);
+ await stage(page,'create');
  await page.locator(slot+' img').waitFor({state:'visible'});
  assert.equal(await page.locator('#production-world').inputValue(),'旧本番の世界観');
  assert.equal(await field(page,'coins').inputValue(),'');

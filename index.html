@@ -68,17 +68,23 @@
 </section>
 </div>
 <div class="workflow-panel" id="workflow-panel-create" role="tabpanel" aria-labelledby="workflow-create" hidden>
-<section class="picker-section" aria-label="カラースキン一覧" hidden><div class="picker-title"><h2>カラースキン</h2><p>9系統・全50種類。タップするとプレビューが切り替わります。</p></div><div id="skin-groups" class="skin-groups"></div></section>
+<nav class="workflow-shortcuts" hidden aria-label="この工程の項目"><a href="#picker-title">カラースキン</a><a href="#assets-heading">原画スロット</a><a href="#production-tools">加工補助</a></nav>
+<section class="picker-section" aria-label="カラースキン一覧" hidden><div class="picker-title" id="picker-title"><h2>カラースキン</h2><p>9系統・全50種類。タップするとプレビューが切り替わります。</p></div><label class="skin-filter-label" for="skin-filter">色の系統</label> <select id="skin-filter"><option value="">すべての系統</option></select><div id="skin-groups" class="skin-groups"></div></section>
 <section class="assets-section" aria-labelledby="assets-heading" hidden>
  <h2 id="assets-heading">原画スロット（全25枠）</h2>
- <p class="asset-help">トーク背景はトーク画面プレビューで管理します。</p>
- <div id="asset-slots" class="asset-slots"></div>
+ <div id="asset-slots" class="asset-groups">
+  <section class="asset-group"><h3>メイン画像・背景</h3><div id="asset-surfaces" class="asset-slots">
+   <article class="asset-card" data-slot="talkBackground"><h4>トーク背景</h4><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p id="background-preview-error" class="notice" role="status" hidden></p><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></article>
+  </div></section>
+  <section class="asset-group"><h3>パスコード</h3><div id="asset-passcode" class="asset-slots"></div></section>
+  <section class="asset-group"><h3>プロフィール</h3><div id="asset-profile" class="asset-slots"></div></section>
+ </div>
  <details class="menu-assets">
   <summary>メニューアイコン（18枠）</summary>
-  <div id="menu-slots" class="asset-slots"></div>
+  <div id="menu-slots" class="menu-pairs"></div>
  </details>
 </section>
-<section class="production-section" hidden> <details>
+<section class="production-section" id="production-tools" hidden> <details>
   <summary>原画の加工補助</summary>
   <label>加工方法
    <select id="production-tool">
@@ -112,7 +118,7 @@
   <button type="button" role="tab" id="tab-passcode" aria-controls="panel-passcode" aria-selected="false" tabindex="-1">パスコード</button>
   <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1">メニュー</button>
  </div>
- <div id="panel-talk" role="tabpanel" aria-labelledby="tab-talk"><div class="section-heading"><div><h2>完成イメージ</h2><p id="selected-name">スキンを選択してください</p></div><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></div><div class="phone-frame"><div class="talk-header" id="talk-header"><span class="back-mark" aria-hidden="true">‹</span><strong>トーク</strong><span class="header-dots" aria-hidden="true">•••</span></div><div class="talk-area" id="talk-area"><div class="message-row other"><div class="avatar" aria-hidden="true">相</div><div class="bubble" id="other-bubble">こんにちは</div></div><div class="message-row own"><div class="bubble" id="own-bubble">よろしく！</div></div></div><div class="talk-footer" aria-label="入力欄の仮表示"><span>＋</span><div class="input-mock"></div><span>☺</span></div></div><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p id="background-preview-error" class="notice" role="status" hidden></p><p class="notice">配色は実測値ベースの参考表示です。</p></div>
+ <div id="panel-talk" role="tabpanel" aria-labelledby="tab-talk"><div class="section-heading"><div><h2>完成イメージ</h2><p id="selected-name">スキンを選択してください</p></div></div><div class="phone-frame"><div class="talk-header" id="talk-header"><span class="back-mark" aria-hidden="true">‹</span><strong>トーク</strong><span class="header-dots" aria-hidden="true">•••</span></div><div class="talk-area" id="talk-area"><div class="message-row other"><div class="avatar" aria-hidden="true">相</div><div class="bubble" id="other-bubble">こんにちは</div></div><div class="message-row own"><div class="bubble" id="own-bubble">よろしく！</div></div></div><div class="talk-footer" aria-label="入力欄の仮表示"><span>＋</span><div class="input-mock"></div><span>☺</span></div></div><p class="notice">配色は実測値ベースの参考表示です。</p></div>
  <div id="panel-passcode" role="tabpanel" aria-labelledby="tab-passcode" hidden>
   <div class="phone-frame passcode-frame">
    <div id="passcode-upper" class="passcode-upper">
@@ -139,6 +145,7 @@
 </section>
 </div>
 <div class="workflow-panel" id="workflow-panel-apply" role="tabpanel" aria-labelledby="workflow-apply" hidden>
+<nav class="workflow-shortcuts" hidden aria-label="この工程の項目"><a href="#sales-heading">販売情報</a><a href="#submission-heading">提出用ZIP</a></nav>
 <section id="sales-section" class="production-section" aria-labelledby="sales-heading" hidden>
  <h2 id="sales-heading">販売情報・申請用コピー</h2>
  <p>使用スキン：<span id="sales-skin"></span></p>

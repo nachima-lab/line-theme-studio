@@ -298,6 +298,7 @@ test('旧コミットの実画面で作成した作品を、同じオリジン�
    await open(base+'index.html');
    assert.equal(await page.locator('#production-world').inputValue(),'旧版の世界観');
    assert.equal(await page.locator('#production-style').inputValue(),'旧版の画風');
+   await page.locator('#workflow-create').click();
    await page.locator('[data-slot=mainImage] .asset-filename').getByText('旧版で作成.png').waitFor();
    const after=await snapshot(page);
    assert.equal(after.active.revision,before.legacy.revision);

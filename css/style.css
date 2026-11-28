@@ -132,3 +132,17 @@ main{display:block;padding-inline:max(15px,env(safe-area-inset-left));padding-ri
 .workflow-progress{margin-bottom:10px;font-size:.875rem}
 .workflow-progress ul{display:flex;flex-wrap:wrap;gap:4px 12px;margin:0;padding:0;list-style:none}
 .workflow-progress p{margin:5px 0 0;color:#604a39}
+.asset-groups,.menu-pairs{display:grid;gap:12px}
+.asset-group h3,.menu-pair h3{margin:8px 0;font-size:15px}
+.asset-card h4{margin:0 0 6px;font-size:14px}
+.menu-pairs{margin-top:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.menu-pair-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.menu-pair .asset-card{min-width:0}
+.menu-pair .asset-preview{height:96px;background:repeating-conic-gradient(#eee 0% 25%,#fff 0% 50%) 0 0/16px 16px;text-align:center}
+.menu-pair .asset-controls>*{width:100%}
+.asset-slots .background-actions{display:block;margin:8px 0}
+.skin-filter-label{display:inline-block;margin-bottom:12px}
+#skin-filter{min-height:44px;margin-bottom:12px}
+.workflow-panel .skin-groups{max-height:none;overflow:visible}
+.workflow-shortcuts{display:flex;flex-wrap:wrap;gap:4px 12px}
+.workflow-shortcuts a{display:inline-flex;align-items:center;min-height:44px;color:#604a39}

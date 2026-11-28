@@ -62,6 +62,47 @@ test('制作工程・作品切替・プレビュー・狭い画面',async()=>{
   await page.waitForFunction(()=>document.querySelector('#progress-images').textContent.includes('0/25'));
   assert.match(await page.locator('#workflow-next').textContent(),/キャラ表/);
   assert.equal(await tab('create').getAttribute('aria-selected'),'true');
+  assert.equal(await page.locator('[data-slot]').count(),25);
+  await page.locator('.menu-assets summary').click();
+  assert.equal(await page.locator('.menu-pair').count(),9);
+  for(const pair of await page.locator('.menu-pair').all()){
+   assert.deepEqual(await pair.locator('h4').allTextContents(),['OFF','ON']);
+  }
+  assert.equal(await page.locator('.skin-tile:visible').count(),50);
+  await page.locator('#skin-filter').selectOption('Green');
+  assert.equal(await page.locator('#skin-groups > section:visible').count(),1);
+  assert.match(await page.locator('#skin-groups > section:visible h3').textContent(),/Green/);
+  await page.locator('#skin-filter').selectOption('');
+  assert.equal(await page.locator('.skin-tile:visible').count(),50);
+  const fileChooser=page.waitForEvent('filechooser');
+  await page.locator('#choose-background').click();
+  await (await fileChooser).setFiles(file);
+  await page.waitForFunction(()=>document.querySelector('#progress-images').textContent.includes('1/25'));
+  const fixture=process.env.FULL_BACKUP;
+  if(fixture){
+   await select('prepare');
+   page.once('dialog',dialog=>dialog.accept());
+   await page.locator('#import-backup').setInputFiles(fixture);
+   await page.waitForFunction(()=>document.querySelector('#save-status').textContent.includes('バックアップを復元しました'));
+   assert.match(await page.locator('#progress-images').textContent(),/25\/25/);
+   await select('apply');
+   await page.locator('#submission-generate').click();
+   const download=page.locator('#submission-download');
+   await download.waitFor({state:'visible',timeout:120000});
+   const href=await download.getAttribute('href');
+   assert.equal(await page.locator('#submission-results tbody tr').count(),62);
+   assert.match(await page.locator('#progress-zip').textContent(),/生成済み/);
+   await select('check');
+   await select('apply');
+   assert.equal(await download.getAttribute('href'),href);
+   const event=page.waitForEvent('download');
+   await download.click();
+   assert.match((await event).suggestedFilename(),/\.zip$/);
+  }
+  await select('apply');
+  await page.setViewportSize({width:320,height:300});
+  assert.equal(await page.locator('.workflow-bar').evaluate(el=>getComputedStyle(el).position),'static');
+  await field.fill('短い表示領域でも入力');
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
