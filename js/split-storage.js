@@ -1,7 +1,7 @@
 import {detectImageMime} from './image-format.js';
 import {verifyOriginal} from './image-preview.js';
 
-const DB='line-theme-studio',LEGACY='projects',COLLECTIONS='collections_v2',
+const DB='line-theme-studio-workflow-iphone-preview-20261128',LEGACY='projects',COLLECTIONS='collections_v2',
  META='project_meta_v2',IMAGES='image_blobs_v2';
 const ACTIVE='active',STAGING='staging';
 const splitStores=[COLLECTIONS,META,IMAGES];
