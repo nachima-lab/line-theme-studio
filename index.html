@@ -241,6 +241,19 @@
 </div>
 <dialog id="part-dialog" aria-labelledby="part-heading">
  <h2 id="part-heading"></h2>
+ <details id="part-import">
+  <summary>個別設計JSONを取り込む</summary>
+  <label for="part-import-input">ChatGPTから受け取った1枠分の設計</label>
+  <textarea id="part-import-input" rows="4" spellcheck="false" autocapitalize="off"></textarea>
+  <button type="button" id="part-import-preview">取り込む内容を確認</button>
+  <div id="part-import-review" hidden>
+   <p id="part-import-target"></p>
+   <ul id="part-import-changes"></ul>
+   <button type="button" id="part-import-apply">この枠に取り込む</button>
+   <button type="button" id="part-import-cancel">確認を取り消す</button>
+  </div>
+  <p id="part-import-status" role="status"></p>
+ </details>
  <div id="part-fields"></div>
  <div id="part-character-field">
   <label for="part-character-selection">登場するキャラクター</label>

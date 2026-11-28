@@ -66,5 +66,14 @@ export function imagePrompt(project,slot,{part=project.production.design?.parts[
   });
   texts.push('【個別設計：'+slot.label+'】'+(details.length?'\n'+details.join('\n'):''));
  }
+ if(consultation){
+  const examples={composition:'構図',characterIds:all.slice(0,1).map(character=>character.id),motifs:['モチーフ'],
+   placement:'配置',expression:'表情',stateNotes:'OFF／ONの違い'};
+  const format=JSON.stringify({sheetVersion:1,parts:{[slot.id]:examples}});
+  texts.push('相談がまとまり、私が了承したら、次の形式のJSONだけを出力してください。枠IDは変更せず、未決定の項目は省略できます。'
+   +' characterIds には既存のIDだけを使い、共通設計に合わせる場合は省略し、登場させない場合は空配列にしてください。'
+   +(all.length?' 使用できるID：'+all.map(character=>character.id+'（'+character.name+'）').join('、'):'')
+   +'\n'+format);
+ }
  return {text:texts.join('\n\n'),reference,consultation};
 }

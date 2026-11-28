@@ -78,6 +78,19 @@ export function parseDesignSheet(raw,slots){
  return Object.fromEntries(Object.entries(readers).filter(([key])=>own(data,key)).map(([key,read])=>[key,read(data[key])]));
 }
 
+export function parsePartSheet(raw,slotId,slots){
+ const sheet=parseDesignSheet(raw,slots);
+ if(Object.keys(sheet).some(key=>key!=='parts')){
+  fail('設計シート','1枠分の parts だけを貼り付けてください');
+ }
+ const entries=Object.entries(sheet.parts??{});
+ if(entries.length!==1)fail('parts','画像枠を1つだけ指定してください');
+ const [[id,part]]=entries;
+ if(id!==slotId)fail('parts.'+id,'開いている画像枠（'+slotId+'）と一致しません');
+ if(!Object.keys(part).length)fail('parts.'+id,'取り込む設計項目を指定してください');
+ return part;
+}
+
 export function serializeDesignSheet(project,slots){
  const {world,style,colors,design}=project.production;
  const sheet={

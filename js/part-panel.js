@@ -1,4 +1,4 @@
-import {PART_FIELDS,validateDesign} from './design-sheet.js';
+import {PART_FIELDS,parsePartSheet,validateDesign} from './design-sheet.js';
 import {imagePrompt,PART_LABELS} from './image-prompt.js';
 
 const characterSlot={id:'characterSheet',label:'キャラ表'};
@@ -9,7 +9,9 @@ export function setupPartPanel({slots,activeProject,commit}){
  const copy=get('copy'),save=get('save');
  const ids=slots.map(slot=>slot.id);
  const controls=new Map();
- let session;
+ const importInput=get('import-input'),importReview=get('import-review'),importStatus=get('import-status');
+ const importChanges=get('import-changes'),importApply=get('import-apply');
+ let session,proposal;
 
  for(const key of PART_FIELDS.filter(key=>key!=='characterIds')){
   const label=document.createElement('label');
@@ -44,6 +46,80 @@ export function setupPartPanel({slots,activeProject,commit}){
   get('characters').hidden=get('character-selection').value!=='specified';
   referenceField.hidden=session?.slot===characterSlot||!session?.project.production.characterSheet||part?.characterIds?.length===0;
  }
+ function fillFields(project,saved){
+  for(const [key,input] of controls)input.value=key==='motifs'?(saved?.motifs??[]).join('\n'):saved?.[key]??'';
+  get('character-selection').value=saved?.characterIds===undefined?'all':'specified';
+  get('characters').replaceChildren(...(project.production.design?.characters??[]).map(character=>{
+   const label=document.createElement('label');
+   const box=document.createElement('input');
+   box.type='checkbox';box.value=character.id;box.checked=saved?.characterIds?.includes(character.id)??false;
+   label.append(box,character.name);
+   return label;
+  }));
+  session.edited=false;
+ }
+ function resetImportReview(){
+  proposal=null;
+  importReview.hidden=true;
+  importChanges.replaceChildren();
+  importStatus.textContent='';
+ }
+ importInput.addEventListener('input',resetImportReview);
+ get('import-cancel').addEventListener('click',()=>{
+  resetImportReview();
+  get('import-preview').focus();
+ });
+ get('import-preview').addEventListener('click',()=>{
+  resetImportReview();
+  if(!session||session.slot===characterSlot)return;
+  const {project,slot,saved,edited}=session;
+  if(edited){
+   importStatus.textContent='入力欄を編集中です。先に個別設計を保存するか、開き直してください。';
+   return;
+  }
+  try{
+   const patch=parsePartSheet(importInput.value,slot.id,ids);
+   const updated=withPart(project,slot.id,{...saved,...patch}).production.design.parts[slot.id];
+   const changed=Object.keys(patch).filter(key=>JSON.stringify(saved?.[key])!==JSON.stringify(updated[key]));
+   if(!changed.length){importStatus.textContent='変更する項目はありません。';return;}
+   const describe=value=>Array.isArray(value)?value.join('、')||'（なし）':value||'（未設定）';
+   get('import-target').textContent='更新する画像枠：'+slot.label+'（'+slot.id+'）';
+   for(const key of changed){
+    const row=document.createElement('li');
+    row.textContent=PART_LABELS[key]+'：'+describe(saved?.[key])+' → '+describe(updated[key]);
+    importChanges.append(row);
+   }
+   proposal=updated;
+   importReview.hidden=false;
+  }catch(error){importStatus.textContent=error.message;}
+ });
+ importApply.addEventListener('click',async()=>{
+  if(!session||!proposal||session.edited)return;
+  const pending=session,part=proposal;
+  importApply.disabled=true;
+  await commitPart(pending,part,(success,error)=>{
+   importApply.disabled=false;
+   if(session!==pending)return;
+   if(!success){importStatus.textContent=error?.message??'取り込めませんでした。';return;}
+   const project=activeProject();
+   const saved=project.production.design.parts[pending.slot.id];
+   Object.assign(session,{project,saved});
+   fillFields(project,saved);
+   update();
+   importInput.value='';
+   resetImportReview();
+   importStatus.textContent='この枠の個別設計を取り込みました。';
+   copy.focus();
+  });
+ });
+ function commitPart({project,slot,saved},part,complete){
+  return commit(project.id,current=>{
+   if(JSON.stringify(current.production.design?.parts[slot.id])!==JSON.stringify(saved)){
+    throw new Error('個別設計が変更されました。画面を開き直してください。');
+   }
+   return withPart(current,slot.id,part);
+  },complete);
+ }
  function open(slot,opener){
   const project=activeProject();
   if(!project)return;
@@ -56,33 +132,29 @@ export function setupPartPanel({slots,activeProject,commit}){
   status.textContent='';
   fallback.hidden=true;
   fallback.value='';
-  for(const [key,input] of controls)input.value=key==='motifs'?(saved?.motifs??[]).join('\n'):saved?.[key]??'';
-  get('character-selection').value=saved?.characterIds===undefined?'all':'specified';
-  get('characters').replaceChildren(...(project.production.design?.characters??[]).map(character=>{
-   const label=document.createElement('label');
-   const box=document.createElement('input');
-   box.type='checkbox';box.value=character.id;box.checked=saved?.characterIds?.includes(character.id)??false;
-   label.append(box,character.name);
-   return label;
-  }));
+  get('import').hidden=slot===characterSlot;
+  get('import').open=false;
+  importInput.value='';
+  resetImportReview();
+  fillFields(project,saved);
   update();
   dialog.showModal();
  }
- dialog.addEventListener('input',update);
+ dialog.addEventListener('input',event=>{
+  if(session&&(fields.contains(event.target)||get('character-field').contains(event.target))){
+   session.edited=true;
+   resetImportReview();
+  }
+  update();
+ });
  dialog.addEventListener('close',()=>{session?.opener.focus();session=null;});
  get('close').addEventListener('click',()=>dialog.close());
  save.addEventListener('click',async()=>{
   if(!session)return;
   const pending=session;
-  const {project,slot,saved}=pending;
   const part=draft();
   save.disabled=true;
-  await commit(project.id,current=>{
-   if(JSON.stringify(current.production.design?.parts[slot.id])!==JSON.stringify(saved)){
-    throw new Error('個別設計が変更されました。画面を開き直してください。');
-   }
-   return withPart(current,slot.id,part);
-  },(success,error)=>{
+  await commitPart(pending,part,(success,error)=>{
    save.disabled=false;
    if(session!==pending)return;
    if(success)dialog.close();
@@ -92,6 +164,7 @@ export function setupPartPanel({slots,activeProject,commit}){
  copy.addEventListener('click',async()=>{
   if(!session)return;
   fallback.hidden=true;
+  status.textContent='';
   try{
    const project=activeProject();
    if(project?.id!==session.project.id)throw new Error('対象の作品を開き直してください。');

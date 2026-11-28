@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {parseDesignSheet,designDiff,applyDesignDiff,validateDesign,serializeDesignSheet} from '../js/design-sheet.js';
+import {parseDesignSheet,designDiff,applyDesignDiff,validateDesign,serializeDesignSheet,parsePartSheet} from '../js/design-sheet.js';
 import {IMAGE_SLOTS,createProject} from '../js/store.js';
 
 const ids=IMAGE_SLOTS.map(slot=>slot.id);
@@ -64,4 +64,13 @@ test('保存済みの編集内容から取り込み互換のJSONを作る',()=>{
  assert.doesNotMatch(json,/lastImport|redo|characterSheet/);
  assert.equal(JSON.parse(serializeDesignSheet(createProject('設計なし'),ids)).sheetVersion,1);
  assert.throws(()=>serializeDesignSheet({...saved,name:'長'.repeat(121)},ids),/workName/);
+});
+
+test('1枠取り込みは開いている枠だけを許可する',()=>{
+ const json=(parts,extra={})=>JSON.stringify({sheetVersion:1,parts,...extra});
+ assert.deepEqual(parsePartSheet(json({mainImage:{characterIds:[],expression:'笑顔'}}),'mainImage',ids),
+  {characterIds:[],expression:'笑顔'});
+ assert.throws(()=>parsePartSheet(json({talkBackground:{composition:'中央'}}),'mainImage',ids),/一致しません/);
+ assert.throws(()=>parsePartSheet(json({mainImage:{composition:'中央'},talkBackground:{composition:'中央'}}),'mainImage',ids),/1つだけ/);
+ assert.throws(()=>parsePartSheet(json({mainImage:{composition:'中央'}},{worldview:'変更'}),'mainImage',ids),/parts だけ/);
 });

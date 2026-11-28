@@ -170,3 +170,7 @@ main{display:block;padding-inline:max(15px,env(safe-area-inset-left));padding-ri
 .production-card-action[aria-pressed="true"]{border-color:#805038;background:#f4e8dc}
 .production-card-action,.production-recommendation button,.preview-source-controls button,.preview-source-controls select{min-height:44px;max-width:100%;font:inherit}
 .asset-card:focus{outline:2px solid #805038;outline-offset:2px}
+
+#part-import{margin:12px 0}
+#part-import summary{display:list-item;align-content:center;min-height:44px;cursor:pointer}
+#part-import-changes{white-space:pre-wrap;overflow-wrap:anywhere}
