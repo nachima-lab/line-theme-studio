@@ -1,3 +1,4 @@
+import {nextImage} from './production-list.js';
 import {SALES_FIELDS,SALES_LANGUAGES,SALES_PRICES,salesTextStatus} from './sales.js';
 import {IMAGE_SLOTS} from './store.js';
 
@@ -18,13 +19,15 @@ export function setupWorkflowProgress(){
   const price=SALES_PRICES.find(item=>item.coins===sales?.coins);
   const commonReady=/^[A-Za-z0-9]{1,50}$/.test(sales?.copyright??'')
    && Boolean(price) && sales.includesJapan!==null && (!price.outsideJapan||!sales.includesJapan);
-  const next=!sheet?'準備でキャラ表を登録しましょう。'
-   :imageCount<IMAGE_SLOTS.length?'制作で未登録の原画を追加しましょう。'
+  const candidate=nextImage(project);
+  const prepared=imageCount||project.production.design||project.production.world||project.production.style||project.production.colors.length;
+  const next=!prepared?'準備で企画を相談するか、制作で好きな原画から始めましょう。'
+   :candidate?'制作で'+candidate.label+'を'+(candidate.redo?'作り直しましょう。':'作りましょう。')
    :!englishReady||!commonReady?'申請で必須の販売情報を確認しましょう。'
    :!zipReady?'確認で仕上がりを見て、申請で提出用ZIPを生成しましょう。'
    :'申請で提出用ZIPをダウンロードできます。';
   const values=[
-   'キャラ表 '+(sheet?'登録済み':'未登録'),
+   'キャラ表 '+(sheet?'登録済み':'任意・未登録'),
    '原画 '+imageCount+'/'+IMAGE_SLOTS.length,
    '販売情報 '+languages.length+'/4言語入力・英語必須 '+(englishReady?'入力済み':'要確認'),
    zipReady?'提出用ZIP 生成済み':'提出用ZIP 未生成',

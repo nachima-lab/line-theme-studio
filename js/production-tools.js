@@ -101,7 +101,7 @@ export function setupProductionTools(setImage){
   if(!validDraft(draft)){invalidate();return;}
   const item=draft;
   if(item.color&&item.previous&&!confirm('登録済みのON画像を、この下書きに差し替えますか？'))return;
-  setImage(item.target,item.image,!item.color);
+  setImage(item.target,item.image,{rememberOriginal:!item.color,replacement:item.color});
   invalidate();
   message.textContent='下書きを採用しました。';
  });
@@ -109,12 +109,12 @@ export function setupProductionTools(setImage){
  undo.addEventListener('click',()=>{
   const slot=slots.value,original=project?.production.undo[slot];
   if(!project?.images[slot]||!original)return;
-  setImage(slot,original,false);
+  setImage(slot,original);
   invalidate();
   message.textContent='直前の透過処理を取り消しました。';
  });
 
- return function render(next){
+ function render(next){
   const previous=project;
   project=next;
   if(previous?.id!==next?.id||previous?.images!==next?.images){
@@ -126,4 +126,16 @@ export function setupProductionTools(setImage){
   }
   refreshControls();
  };
+ render.selectColorSource=id=>{
+  if(!project?.images[id]||!/^menu-.+-off$/.test(id))return false;
+  if(kind.value!=='color'||slots.value!==id){
+   kind.value='color';
+   refreshSlots();
+   slots.value=id;
+   invalidate();
+  }
+  kind.closest('details').open=true;
+  return true;
+ };
+ return render;
 }

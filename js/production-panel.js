@@ -166,5 +166,6 @@ export function setupProductionPanel({save,setImage}){
   fileLabel.textContent=p.characterSheet?.name??'未登録';
  }
  render.retryFailed=characterPreview.retry;
+ render.selectColorSource=tools.selectColorSource;
  return render;
 }

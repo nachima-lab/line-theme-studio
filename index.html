@@ -108,7 +108,12 @@
 <nav class="workflow-shortcuts" hidden aria-label="この工程の項目"><a href="#picker-title">カラースキン</a><a href="#assets-heading">原画スロット</a><a href="#production-tools">加工補助</a></nav>
 <section class="picker-section" aria-label="カラースキン一覧" hidden><div class="picker-title" id="picker-title"><h2>カラースキン</h2><p>9系統・全50種類。タップするとプレビューが切り替わります。</p></div><label class="skin-filter-label" for="skin-filter">色の系統</label> <select id="skin-filter"><option value="">すべての系統</option></select><div id="skin-groups" class="skin-groups"></div></section>
 <section class="assets-section" aria-labelledby="assets-heading" hidden>
- <h2 id="assets-heading">原画スロット（全25枠）</h2>
+ <h2 id="assets-heading">制作リスト（全25枠）</h2>
+ <p>好きな画像から制作・登録できます。構図を決めたいときは各枠の「個別設計・指示文」を開きます。</p>
+ <div class="production-recommendation">
+  <p id="production-recommendation"></p>
+  <button type="button" id="production-recommendation-jump" hidden>おすすめの画像枠へ</button>
+ </div>
  <div id="asset-slots" class="asset-groups">
   <section class="asset-group"><h3>メイン画像・背景</h3><div id="asset-surfaces" class="asset-slots">
    <article class="asset-card" data-slot="talkBackground"><h4>トーク背景</h4><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p id="background-preview-error" class="notice" role="status" hidden></p><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></article>
@@ -150,6 +155,11 @@
 </section></div>
 <div class="workflow-panel" id="workflow-panel-check" role="tabpanel" aria-labelledby="workflow-check" hidden>
 <section class="preview-section" hidden aria-label="画面プレビュー">
+ <div class="preview-source-controls">
+  <label for="preview-source-slot">直したい原画</label>
+  <select id="preview-source-slot"></select>
+  <button type="button" id="preview-source-jump">制作の画像枠へ</button>
+ </div>
  <div class="preview-tabs" role="tablist" aria-label="画面プレビュー">
   <button type="button" role="tab" id="tab-talk" aria-controls="panel-talk" aria-selected="true">トーク</button>
   <button type="button" role="tab" id="tab-passcode" aria-controls="panel-passcode" aria-selected="false" tabindex="-1">パスコード</button>

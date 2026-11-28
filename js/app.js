@@ -1,3 +1,4 @@
+import {setupProductionList} from './production-list.js';
 import {setupPartPanel} from './part-panel.js';
 import {setupDesignPanel} from './design-panel.js';
 import {setupSalesPanel} from './sales-panel.js';
@@ -34,13 +35,14 @@ const list=document.getElementById('project-list');
 const newButton=document.getElementById('new-project');
 const renameButton=document.getElementById('rename-project');
 const deleteButton=document.getElementById('delete-project');
-setupPreviewTabs();
-setupWorkflowTabs();
+const openStage=setupWorkflowTabs();
 const extraPreviews=setupExtraPreviews();
 const renderSales=setupSalesPanel({save:sales=>updateProject({sales})});
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
 const renderDesign=setupDesignPanel({slots:IMAGE_SLOTS,commit:commitDesign});
 const initPartButtons=setupPartPanel({slots:IMAGE_SLOTS,activeProject,commit:commitDesign});
+const productionList=setupProductionList({openStage,selectColorSource:renderProduction.selectColorSource,toggleRedo});
+setupPreviewTabs(productionList.selectPreview);
 const renderProgress=setupWorkflowProgress();
 const renderExport=setupExportPanel({
  saveSettings:exportSettings=>updateProject({exportSettings}),runOperation,renderProgress
@@ -158,6 +160,7 @@ function updateProject(changes){
  extraPreviews.renderProject(updated);
  renderProduction(updated);
  renderDesign(updated);
+ productionList.render(updated);
  renderSales(updated,skins.find(s=>s.id===updated.skinId)?.displayName);
 }
 
@@ -177,7 +180,17 @@ function showBackground(){
  removeButton.hidden=!item;
 }
 
-function setImage(slotId,item,rememberOriginal=false){
+function toggleRedo(slotId){
+ const project=activeProject();
+ if(busy||!project?.images[slotId])return;
+ const {production}=project;
+ const redo=new Set(production.design?.redo);
+ if(redo.has(slotId))redo.delete(slotId);
+ else redo.add(slotId);
+ updateProject({production:{...production,design:{...production.design,redo:[...redo]}}});
+}
+
+function setImage(slotId,item,{rememberOriginal=false,replacement=false}={}){
  pendingImages.delete(slotId);
  const project=activeProject();
  const images={...project.images};
@@ -186,7 +199,11 @@ function setImage(slotId,item,rememberOriginal=false){
  else delete undo[slotId];
  if(item)images[slotId]=item;
  else delete images[slotId];
- updateProject({images,production:{...project.production,undo}});
+ const production={...project.production,undo};
+ if((replacement||!item)&&production.design?.redo.includes(slotId)){
+  production.design={...production.design,redo:production.design.redo.filter(id=>id!==slotId)};
+ }
+ updateProject({images,production});
  if(slotId==='talkBackground')showBackground();
  else renderAssetSlot(slotId);
 }
@@ -207,7 +224,7 @@ function selectImage(slotId,fileInput){
   if(!isCurrent())return;
   try{
    const preview=await makeWorkingPreview(file);
-   if(isCurrent())setImage(slotId,{name:file.name,blob:file,preview});
+   if(isCurrent())setImage(slotId,{name:file.name,blob:file,preview},{replacement:true});
   }catch{
    if(isCurrent())alert('画像を読み込めませんでした。PNGまたはJPEGをお試しください。');
   }finally{
@@ -313,6 +330,7 @@ function renderCollection(){
  extraPreviews.renderProject(project);
  renderProduction(project,true);
  renderDesign(project);
+ productionList.render(project);
  renderSales(project,skins.find(s=>s.id===project?.skinId)?.displayName);
  showBackground();
  for(const slotId of assetViews.keys())renderAssetSlot(slotId);
@@ -337,6 +355,7 @@ async function init(){
   ({collection,revision}=await loadCollection(skinIds));
   initAssetSlots();
   initPartButtons();
+  productionList.init();
   renderCollection();
   newButton.disabled=exportButton.disabled=chooseBackup.disabled=false;
   status('自動保存が有効です');

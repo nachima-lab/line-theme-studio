@@ -1,4 +1,4 @@
-export function setupPreviewTabs(){
+export function setupPreviewTabs(onSelect){
  const tabs=[...document.querySelectorAll('.preview-tabs [role=tab]')];
  function select(selected){
   for(const tab of tabs){
@@ -7,6 +7,7 @@ export function setupPreviewTabs(){
    tab.tabIndex=active?0:-1;
    document.getElementById(tab.getAttribute('aria-controls')).hidden=!active;
   }
+  onSelect(selected.id.slice(4));
  }
  for(const [index,tab] of tabs.entries()){
   tab.addEventListener('click',()=>select(tab));

@@ -161,3 +161,12 @@ main{display:block;padding-inline:max(15px,env(safe-area-inset-left));padding-ri
 #part-dialog label{display:block;margin:10px 0}
 #part-dialog textarea,#part-dialog select{display:block;width:100%;font-size:16px}
 #part-characters label,#part-reference-field{min-height:44px}
+
+.production-recommendation,.preview-source-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.production-recommendation{padding:8px 12px;background:#ede7dd;border-radius:8px}
+.production-recommendation p,.production-card-status{margin:0}
+.production-card-status{padding:6px 0;font-size:.875rem;overflow-wrap:anywhere}
+.production-card-action{width:100%;margin-top:4px;overflow-wrap:anywhere}
+.production-card-action[aria-pressed="true"]{border-color:#805038;background:#f4e8dc}
+.production-card-action,.production-recommendation button,.preview-source-controls button,.preview-source-controls select{min-height:44px;max-width:100%;font:inherit}
+.asset-card:focus{outline:2px solid #805038;outline-offset:2px}

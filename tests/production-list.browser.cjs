@@ -1,0 +1,103 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {readFile}=require('node:fs/promises');
+const {chromium}=require('playwright');
+
+const base=process.env.TEST_URL??'http://127.0.0.1:8942/';
+const wait=(page,id,value)=>page.waitForFunction(([id,value])=>document.getElementById(id).textContent.includes(value),[id,value]);
+
+test('キャラ表なしで始め、原画の続き・作り直し・色替え・確認からの移動を使える',async()=>{
+ const browser=await chromium.launch(process.env.CHROMIUM_PATH?{
+  executablePath:process.env.CHROMIUM_PATH,args:['--no-sandbox']
+ }:{});
+ try{
+  const page=await browser.newPage({viewport:{width:320,height:680}});
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.goto(base);
+  await wait(page,'save-status','自動保存が有効');
+  const find=id=>page.locator('#'+id);
+  const stage=id=>find('workflow-'+id).click();
+  const card=id=>page.locator('[data-slot="'+id+'"]');
+  const mark=id=>card(id).getByRole('button',{name:'作り直しに指定'});
+  const png=await page.evaluate(()=>{
+   const canvas=document.createElement('canvas');
+   canvas.width=canvas.height=16;
+   const ctx=canvas.getContext('2d');
+   ctx.fillStyle='#fff';ctx.fillRect(0,0,16,16);
+   return canvas.toDataURL().split(',')[1];
+  });
+  const file=name=>({name,mimeType:'image/png',buffer:Buffer.from(png,'base64')});
+  const upload=(id,name)=>card(id).locator('input[type=file]').setInputFiles(file(name));
+  await wait(page,'progress-sheet','任意・未登録');
+  await find('design-input').fill(JSON.stringify({sheetVersion:1,parts:{'menu-talk-off':{composition:'中央'}}}));
+  await find('design-preview').click();
+  await find('design-apply').click();
+  await wait(page,'design-status','取り込みました');
+  await wait(page,'workflow-next','メニューアイコン トーク OFF');
+  await stage('create');
+  await find('production-recommendation-jump').click();
+  assert.equal(await card('menu-talk-off').evaluate(el=>el===document.activeElement),true);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),320);
+  await upload('profileGroup','group.png');
+  await wait(page,'progress-images','1/25');
+  await mark('profileGroup').click();
+  await wait(page,'workflow-next','プロフィール グループを作り直し');
+  await wait(page,'save-status','自動保存済み');
+  await stage('prepare');
+  const download=page.waitForEvent('download');
+  await find('export-backup').click();
+  const zip=await readFile(await (await download).path());
+  await page.reload();
+  await wait(page,'workflow-next','プロフィール グループを作り直し');
+  await stage('create');
+  await find('production-recommendation-jump').click();
+  assert.equal(await card('profileGroup').evaluate(el=>el===document.activeElement),true);
+  assert.match(await card('profileGroup').innerText(),/group.png/);
+  const refused=page.waitForEvent('dialog');
+  await card('profileGroup').locator('input[type=file]').setInputFiles({
+   name:'corrupt.png',mimeType:'image/png',buffer:Buffer.from('invalid image')
+  });
+  await (await refused).accept();
+  await wait(page,'workflow-next','プロフィール グループを作り直し');
+  await upload('profileGroup','group-replacement.png');
+  await wait(page,'workflow-next','メニューアイコン トーク OFF');
+  assert.match(await card('profileGroup').innerText(),/group-replacement.png/);
+  await page.locator('.menu-assets > summary').click();
+  await upload('menu-talk-off','talk.png');
+  await wait(page,'progress-images','2/25');
+  await upload('menu-talk-on','previous-on.png');
+  await wait(page,'progress-images','3/25');
+  await mark('menu-talk-on').click();
+  await card('menu-talk-off').getByRole('button',{name:/からONを作る/}).click();
+  assert.equal(await find('production-tool').inputValue(),'color');
+  assert.equal(await find('production-source').inputValue(),'menu-talk-off');
+  await find('production-to').fill('#112233');
+  await find('production-preview-draft').click();
+  await find('production-draft').waitFor({state:'visible'});
+  assert.match(await card('menu-talk-on').innerText(),/作り直し予定/);
+  page.once('dialog',dialog=>dialog.accept());
+  await find('production-adopt-draft').click();
+  await wait(page,'production-draft-status','採用しました');
+  assert.match(await card('menu-talk-on').innerText(),/talk-on.png/);
+  assert.doesNotMatch(await card('menu-talk-on').innerText(),/作り直し予定/);
+  await stage('check');
+  await find('tab-menu').click();
+  await find('preview-source-slot').selectOption('menu-talk-on');
+  await find('preview-source-jump').click();
+  assert.equal(await find('workflow-create').getAttribute('aria-selected'),'true');
+  assert.equal(await card('menu-talk-on').evaluate(el=>el===document.activeElement),true);
+  assert.ok(await card('menu-talk-on').evaluate(el=>
+   el.getBoundingClientRect().top>=document.querySelector('.workflow-bar').getBoundingClientRect().bottom));
+  await stage('prepare');
+  await find('production-character-input').setInputFiles(file('character.png'));
+  await wait(page,'progress-sheet','登録済み');
+  assert.match(await find('workflow-next').textContent(),/制作で/);
+  page.once('dialog',dialog=>dialog.accept());
+  await find('import-backup').setInputFiles({name:'redo-v5.zip',mimeType:'application/zip',buffer:zip});
+  await wait(page,'save-status','バックアップを復元しました');
+  await wait(page,'workflow-next','プロフィール グループを作り直し');
+  assert.match(await card('profileGroup').locator('.asset-filename').textContent(),/group.png/);
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
