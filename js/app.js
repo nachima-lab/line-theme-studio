@@ -1,5 +1,6 @@
 import {setupSalesPanel} from './sales-panel.js';
 import {setupWorkflowTabs} from './workflow-tabs.js';
+import {setupWorkflowProgress} from "./workflow-progress.js";
 import {loadSkins,groupedSkins,color} from './skins.js';
 import {renderPreview,renderBackground} from './preview.js';
 import {IMAGE_ACCEPT,IMAGE_SLOTS,createProject,defineCollection,loadCollection,saveCollection,parseLegacyJson} from './store.js';
@@ -36,8 +37,9 @@ setupWorkflowTabs();
 const extraPreviews=setupExtraPreviews();
 const renderSales=setupSalesPanel({save:sales=>updateProject({sales})});
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
+const renderProgress=setupWorkflowProgress();
 const renderExport=setupExportPanel({
- saveSettings:exportSettings=>updateProject({exportSettings}),runOperation
+ saveSettings:exportSettings=>updateProject({exportSettings}),runOperation,renderProgress
 });
 
 const backgroundError=document.getElementById('background-preview-error');

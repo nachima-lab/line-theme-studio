@@ -8,6 +8,10 @@
   <p id="save-status" class="save-status" role="status">保存状態を確認中…</p>
  <p id="load-error" class="error" role="alert" hidden></p>
 </div>
+<div id="workflow-progress" class="workflow-progress" hidden>
+ <ul aria-label="制作の進捗"><li id="progress-sheet"></li><li id="progress-images"></li><li id="progress-sales"></li><li id="progress-zip"></li></ul>
+ <p id="workflow-next" role="status"></p>
+</div>
 <div class="workflow-bar"><div class="workflow-tabs" role="tablist" aria-label="制作工程">
  <button type="button" role="tab" id="workflow-prepare" aria-controls="workflow-panel-prepare" aria-selected="true" tabindex="0">準備</button>
  <button type="button" role="tab" id="workflow-create" aria-controls="workflow-panel-create" aria-selected="false" tabindex="-1">制作</button>

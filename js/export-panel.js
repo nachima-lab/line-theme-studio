@@ -3,7 +3,7 @@ import {drawCropPreview} from './export-images.js';
 import {generateSubmission,missingImages} from './submission-export.js';
 import {writeZip} from './zip.js';
 
-export function setupExportPanel({saveSettings,runOperation}){
+export function setupExportPanel({saveSettings,runOperation,renderProgress}){
  const section=document.getElementById('submission-export');
  const tweaks=document.getElementById('export-adjustments');
  const cropSelect=document.getElementById('export-crop-file');
@@ -39,6 +39,7 @@ export function setupExportPanel({saveSettings,runOperation}){
   zipUrl=null;
   download.hidden=true;download.removeAttribute('href');
   results.hidden=true;results.tBodies[0].replaceChildren();
+  renderProgress(project,false);
  }
 
  function updateMissing(){
@@ -108,6 +109,7 @@ export function setupExportPanel({saveSettings,runOperation}){
    const name=project.name.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').trim();
    zipUrl=URL.createObjectURL(zip);
    download.href=zipUrl;download.download=(name||'着せかえ')+'_'+day+'.zip';download.hidden=false;
+   renderProgress(project,true);
    const reduced=files.filter(file=>file.reduced).length;
    status.textContent='62点すべて合格しました。'+(reduced?' 色数を削減したファイルが'+reduced+'点あります。':'');
    return '提出用ZIPを生成しました';
@@ -123,6 +125,7 @@ export function setupExportPanel({saveSettings,runOperation}){
   const invalidate=refresh||project.name!==next.name;
   project=next;
   section.hidden=!project;
+  renderProgress(project,!invalidate&&Boolean(zipUrl));
   if(invalidate){
    clearResult();
    if(project)updateMissing();

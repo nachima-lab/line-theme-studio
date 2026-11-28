@@ -39,6 +39,7 @@ test('制作工程・作品切替・プレビュー・狭い画面',async()=>{
   const first=await list.inputValue();
   page.once('dialog',dialog=>dialog.accept('別作品'));
   await page.locator('#new-project').click();
+  await page.waitForFunction(()=>document.querySelector('#project-list').selectedOptions[0]?.text==='別作品');
   assert.notEqual(await list.inputValue(),first);
   await select('apply');
   assert.equal(await field.inputValue(),'');
@@ -46,6 +47,21 @@ test('制作工程・作品切替・プレビュー・狭い画面',async()=>{
   await page.waitForFunction(()=>document.querySelector('#sales-title').value==='試験販売');
   assert.equal(await field.inputValue(),'試験販売');
   assert.equal(await tab('apply').getAttribute('aria-selected'),'true');
+  assert.match(await page.locator('#progress-images').textContent(),/0\/25/);
+  assert.match(await page.locator('#workflow-next').textContent(),/キャラ表/);
+  const png=await page.evaluate(()=>document.createElement('canvas').toDataURL().split(',')[1]);
+  const file={name:'test.png',mimeType:'image/png',buffer:Buffer.from(png,'base64')};
+  await select('prepare');
+  await page.locator('#production-character-input').setInputFiles(file);
+  await page.waitForFunction(()=>document.querySelector('#progress-sheet').textContent.includes('登録済み'));
+  assert.match(await page.locator('#workflow-next').textContent(),/原画/);
+  await select('create');
+  await page.locator('[data-slot="mainImage"] input').setInputFiles(file);
+  await page.waitForFunction(()=>document.querySelector('#progress-images').textContent.includes('1/25'));
+  await list.selectOption({label:'別作品'});
+  await page.waitForFunction(()=>document.querySelector('#progress-images').textContent.includes('0/25'));
+  assert.match(await page.locator('#workflow-next').textContent(),/キャラ表/);
+  assert.equal(await tab('create').getAttribute('aria-selected'),'true');
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
