@@ -56,15 +56,27 @@ export function setupPartPanel({slots,activeProject,commit,openStage,nextImage})
   const project=activeProject(),id=session.slot.id;
   if(project?.id!==session.project.id)return;
   const saved=hasPartDesign(savedPart(project,id));
-  get('next-action').textContent=proposal?'次にすること：変更内容を確認し、この枠に取り込む'
-   :session.edited?'次にすること：個別設計の編集内容を保存'
-   :importInput.value?'次にすること：貼り付けたJSONの変更内容を確認'
-   :!saved?'次にすること：構図を相談するか、個別設計を入力'
-   :!project.images[id]?'次にすること：画像生成の指示文をコピーし、画像を登録'
-   :'画像は登録済みです。必要に応じて差し替えるか、次の枠へ進めます。';
+  const [action,hint]=session.conflict?['conflict','保存済みの設定と下書きを確認']
+   :proposal?['import-apply','変更を確認して、この画像の設定を保存']
+   :session.edited?['save','手入力した設定を保存']
+   :importInput.value?['import-preview','貼り付けた回答の変更内容を確認']
+   :session.consulted?['import','ChatGPTで相談し、回答を貼り付け']
+   :!saved?['copy-consultation','ChatGPTに構図を相談']
+   :!project.images[id]&&session.generatedPrompt?['image-card','ChatGPTで作った画像を選んで登録']
+   :!project.images[id]?['copy','画像作成の指示をコピーして、ChatGPTで画像を作る']
+   :['next-slot','画像は登録済みです。必要なら差し替え、次の画像へ'];
+  get('next-action').textContent='次におすすめ：'+hint;
+  const emphasized=editor.querySelector('.part-primary');
+  const target=action==='image-card'
+   ?session.card.querySelector('.asset-upload,#choose-background')
+   :get(action);
+  if(emphasized!==target){
+   emphasized?.classList.remove('part-primary');
+   target.classList.add('part-primary');
+  }
   const next=nextImage(project,id)??slots[slots.findIndex(slot=>slot.id===id)+1];
   get('next-slot').hidden=!next;
-  if(next)get('next-slot').textContent='次の枠へ：'+next.label;
+  if(next)get('next-slot').textContent='次の画像へ：'+next.label;
   session.next=next;
  }
 
@@ -227,7 +239,7 @@ export function setupPartPanel({slots,activeProject,commit,openStage,nextImage})
   const saved=savedPart(project,slot.id);
   session={slot,opener,project,saved,base:baseline(project,slot.id)};
   const character=slot===characterSlot;
-  get('heading').textContent=character?'キャラ表作成の指示文':slot.label+'の個別設計';
+  get('heading').textContent=character?'キャラ表作成の指示文':slot.label+'を作る';
   fields.hidden=save.hidden=character;
   for(const id of ['character-field','import','back','image-section','next-action','draft-status','consultation']){
    get(id).hidden=character;
@@ -351,11 +363,20 @@ export function setupPartPanel({slots,activeProject,commit,openStage,nextImage})
    if(revise&&!hasPartDesign(part))throw new Error('保存済みの個別設計がありません。');
    const source=revise||session.slot===characterSlot?project:withPart(project,session.slot.id,part);
    const result=imagePrompt(source,session.slot,{part,revise,useReference:reference.checked&&(revise||!referenceField.hidden)});
+   if(isWorkspace()&&result.consultation){
+    session.consulted=true;
+    get('import').open=true;
+    updateWorkspace();
+   }
    const attach=result.reference?' ChatGPTで「'+project.production.characterSheet.name+'」を添付してください。':'';
    try{
     await navigator.clipboard.writeText(result.text);
     if(session!==pending)return;
     status.textContent='コピーしました。ChatGPTに貼り付けてください。'+attach;
+    if(isWorkspace()&&mode==='generate'&&!result.consultation){
+     session.generatedPrompt=true;
+     updateWorkspace();
+    }
    }catch{
     if(session!==pending)return;
     fallback.value=result.text;
@@ -374,8 +395,8 @@ export function setupPartPanel({slots,activeProject,commit,openStage,nextImage})
   for(const slot of slots){
    const card=document.querySelector('[data-slot="'+slot.id+'"]');
    const button=document.createElement('button');
-   button.type='button';button.className='part-open';button.textContent='個別設計・指示文';
-   button.setAttribute('aria-label',slot.label+'の個別設計・指示文');
+   button.type='button';button.className='part-open';button.textContent='この画像を作る';
+   button.setAttribute('aria-label',slot.label+'を作る');
    button.addEventListener('click',()=>open(slot,button));
    card.append(button);
   }

@@ -28,7 +28,7 @@ export function setupWorkflowProgress(){
    :'申請で提出用ZIPをダウンロードできます。';
   const values=[
    'キャラ表 '+(sheet?'登録済み':'任意・未登録'),
-   '原画 '+imageCount+'/'+IMAGE_SLOTS.length,
+   '画像を登録済み '+imageCount+'/'+IMAGE_SLOTS.length,
    '販売情報 '+languages.length+'/4言語入力・英語必須 '+(englishReady?'入力済み':'要確認'),
    zipReady?'提出用ZIP 生成済み':'提出用ZIP 未生成',
    '次にやること　'+next

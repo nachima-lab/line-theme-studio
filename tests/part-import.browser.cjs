@@ -44,14 +44,14 @@ test('1枠のJSONを確認・更新し、他の設計や原画を保持する',a
   });
   await main.locator('.part-open').tap();
   assert.equal(await find('part-copy-revision').isVisible(),false);
-  assert.match(await find('part-copy-consultation').textContent(),/この枠の相談文/);
+  assert.match(await find('part-copy-consultation').textContent(),/構図の相談文/);
   await find('part-copy-consultation').tap();
   await wait(page,'part-status','コピーしました');
   const newPrompt=await page.evaluate(()=>window.clipboardWritten);
   assert.match(newPrompt,/"sheetVersion":1,"parts":\{"mainImage"/);
   assert.match(newPrompt,/個別設計は未設定/);
   assert.doesNotMatch(newPrompt,/【個別設計：/);
-  await page.locator('#part-import summary').tap();
+  assert.equal(await page.locator('#part-import').evaluate(el=>el.open),true);
   await find('part-import-input').fill(partJSON('talkBackground',{composition:'別枠の案'}));
   await find('part-import-preview').tap();
   await wait(page,'part-import-status','一致しません');
@@ -75,7 +75,7 @@ test('1枠のJSONを確認・更新し、他の設計や原画を保持する',a
   await find('part-import-apply').tap();
   await wait(page,'part-import-status','取り込みました');
   assert.equal(await find('part-copy-revision').isVisible(),true);
-  assert.match(await find('part-copy').textContent(),/画像生成の指示文/);
+  assert.match(await find('part-copy').textContent(),/画像作成の指示/);
   await find('part-copy').tap();
   await wait(page,'part-status','コピーしました');
   const prompt=await page.evaluate(()=>window.clipboardWritten);

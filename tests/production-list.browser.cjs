@@ -19,7 +19,7 @@ test('キャラ表なしで始め、原画の続き・作り直し・色替え�
   const find=id=>page.locator('#'+id);
   const stage=id=>find('workflow-'+id).click();
   const card=id=>page.locator('[data-slot="'+id+'"]');
-  const mark=id=>card(id).getByRole('button',{name:'作り直しに指定'});
+  const mark=id=>card(id).getByRole('button',{name:'作り直し予定にする'});
   const png=await page.evaluate(()=>{
    const canvas=document.createElement('canvas');
    canvas.width=canvas.height=16;
@@ -42,7 +42,9 @@ test('キャラ表なしで始め、原画の続き・作り直し・色替え�
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),320);
   await upload('profileGroup','group.png');
   await wait(page,'progress-images','1/25');
+  await card('profileGroup').locator('.part-open').click();
   await mark('profileGroup').click();
+  await find('part-back').click();
   await wait(page,'workflow-next','プロフィール グループを作り直し');
   await wait(page,'save-status','自動保存済み');
   await stage('prepare');
@@ -70,19 +72,23 @@ test('キャラ表なしで始め、原画の続き・作り直し・色替え�
   await wait(page,'progress-images','2/25');
   await upload('menu-talk-on','previous-on.png');
   await wait(page,'progress-images','3/25');
+  await card('menu-talk-on').locator('.part-open').click();
   await mark('menu-talk-on').click();
+  await find('part-back').click();
+  await card('menu-talk-off').locator('.part-open').click();
   await card('menu-talk-off').getByRole('button',{name:/からONを作る/}).click();
   assert.equal(await find('production-tool').inputValue(),'color');
   assert.equal(await find('production-source').inputValue(),'menu-talk-off');
   await find('production-to').fill('#112233');
   await find('production-preview-draft').click();
   await find('production-draft').waitFor({state:'visible'});
-  assert.match(await card('menu-talk-on').innerText(),/作り直し予定/);
+  assert.match(await card('menu-talk-on').locator('.production-card-status').textContent(),/作り直し予定/);
   page.once('dialog',dialog=>dialog.accept());
   await find('production-adopt-draft').click();
   await wait(page,'production-draft-status','採用しました');
-  assert.match(await card('menu-talk-on').innerText(),/talk-on.png/);
-  assert.doesNotMatch(await card('menu-talk-on').innerText(),/作り直し予定/);
+  assert.match(await card('menu-talk-on').locator('.asset-filename').textContent(),/talk-on.png/);
+  assert.equal(await card('menu-talk-on').locator('.production-card-status').textContent(),'登録済み');
+  await find('part-back').click();
   await stage('check');
   await find('tab-menu').click();
   await find('preview-source-slot').selectOption('menu-talk-on');

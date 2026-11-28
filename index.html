@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f5f1"><title>LINE着せかえ制作室</title><link rel="stylesheet" href="./css/style.css"></head>
-<body><header class="app-header"><div><p class="eyebrow">LINE着せかえ制作室 · Phase 6</p><h1>LINE着せかえ制作室</h1></div><span class="count" id="skin-count">読み込み中</span></header>
+<body><header class="app-header"><div><h1>LINE着せかえ制作室</h1></div><span class="count" id="skin-count">読み込み中</span></header>
 <main>
 <div class="workflow-context">
-  <label for="project-list">作品一覧</label>
+  <label for="project-list">作業する作品</label>
   <select id="project-list" disabled></select>
   <p id="save-status" class="save-status" role="status">保存状態を確認中…</p>
  <p id="load-error" class="error" role="alert" hidden></p>
@@ -22,45 +22,45 @@
 <section class="project-section" aria-labelledby="project-heading">
  <h2 id="project-heading">作品管理</h2>
  <div class="project-controls">
-  <button type="button" id="new-project" disabled>新規作成</button>
-  <button type="button" id="rename-project" disabled>名前を変更</button>
+  <button type="button" id="new-project" disabled>新しい作品を作る</button>
+  <button type="button" id="rename-project" disabled>作品名を変更</button>
   <button type="button" id="delete-project" disabled>作品を削除</button>
  </div>
- <p id="empty-projects" hidden>作品がありません。新規作成またはバックアップの読み込みができます。</p>
+ <p id="empty-projects" hidden>作品がありません。作品を作るか、バックアップから復元できます。</p>
  <div class="backup-panel">
   <div class="backup-controls">
-   <button type="button" id="export-backup" disabled>全作品ZIPを書き出す</button>
-   <button type="button" id="choose-backup" disabled>バックアップを読み込む</button>
+   <button type="button" id="export-backup" disabled>全作品をバックアップ</button>
+   <button type="button" id="choose-backup" disabled>バックアップファイルを選ぶ</button>
    <input id="import-backup" type="file" accept=".zip,.json,application/zip,application/json" hidden>
   </div>
-  <div id="backup-omissions" hidden><p>ZIPに収録できなかった画像があります。</p><ul></ul></div><p class="backup-help">作品はこのブラウザに自動保存されます。全作品ZIPの読み込みは作品一覧を置き換えます。旧ZIPと旧JSONは1作品として追加します。</p>
+  <div id="backup-omissions" hidden><p>ZIPに収録できなかった画像があります。</p><ul></ul></div><p class="backup-help">バックアップは作品を復元するためのファイルです。全作品の復元では現在の作品一覧が置き換わります。旧形式では1作品として追加します。</p>
  </div>
 </section>
 <section id="design-panel" class="production-section" aria-labelledby="design-heading" hidden>
  <h2 id="design-heading">ChatGPTで企画を相談</h2>
- <p>相談開始文をコピーしてChatGPTに貼り付け、企画が決まったら回答の設計シートを下に貼り付けます。</p>
+ <p>相談文をコピーしてChatGPTに貼り付けます。企画が決まったら、回答をここに貼り付けます。</p>
  <div class="production-controls">
-  <button type="button" id="design-copy">相談開始文をコピー</button>
-  <button type="button" id="design-copy-current">現在の設計シートをJSONでコピー</button>
+  <button type="button" id="design-copy">相談文をコピー</button>
+  <button type="button" id="design-copy-current">別のチャット用に設定をコピー</button>
   <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く</a>
  </div>
  <textarea id="design-copy-text" aria-label="手動でコピーする内容" readonly hidden></textarea>
- <label for="design-input">ChatGPTから受け取った設計シート</label>
+ <label for="design-input">ChatGPTの回答を貼り付け</label>
  <textarea id="design-input" rows="5" spellcheck="false" autocapitalize="off"></textarea>
- <button type="button" id="design-preview">取り込む内容を確認</button>
+ <button type="button" id="design-preview">変更内容を確認</button>
  <p id="design-status" role="status"></p>
  <div id="design-review" hidden>
   <ul id="design-differences"></ul>
-  <p>取り込んだ設計シート原文は全作品バックアップにも含まれます。</p>
-  <button type="button" id="design-apply" disabled>選んだ項目を取り込む</button>
+  <p>貼り付けた回答もバックアップに含まれます。</p>
+  <button type="button" id="design-apply" disabled>選んだ変更を保存</button>
   <button type="button" id="design-cancel">確認を取り消す</button>
  </div>
  <details>
-  <summary>キャラクター・モチーフ・補足を編集</summary>
+  <summary>キャラクター・題材・補足を編集</summary>
   <p>世界観・画風・固定色は下の「制作メモ・キャラ表」で編集できます。キャラ表画像の登録は任意です。</p>
   <ul id="design-characters"></ul>
   <button type="button" id="design-add-character">キャラクターを追加</button>
-  <label for="design-motifs">モチーフ（1行に1つ）</label>
+  <label for="design-motifs">絵の題材（1行に1つ）</label>
   <textarea id="design-motifs" rows="3"></textarea>
   <label for="design-notes">補足・禁止事項</label>
   <textarea id="design-notes" rows="3" maxlength="4000"></textarea>
@@ -68,9 +68,9 @@
   <button type="button" id="design-discard-edit">編集を取り消す</button>
   <p id="design-edit-status" role="status"></p>
  </details>
- <details id="design-parts-details" hidden><summary>取り込んだパーツ別の下書き</summary><ul id="design-parts"></ul></details>
- <details id="design-original-details" hidden><summary>最後に取り込んだ設計シート原文</summary>
-  <textarea id="design-original" aria-label="最後に取り込んだ設計シート原文" rows="5" readonly></textarea>
+ <details id="design-parts-details" hidden><summary>画像ごとの保存済み設定</summary><ul id="design-parts"></ul></details>
+ <details id="design-original-details" hidden><summary>前回貼り付けた回答</summary>
+  <textarea id="design-original" aria-label="前回貼り付けた回答" rows="5" readonly></textarea>
  </details>
 </section>
 <section class="production-section" aria-labelledby="production-heading" hidden>
@@ -97,7 +97,7 @@
   <label>世界観メモ <textarea id="production-world" rows="3"></textarea></label>
  </details>
  <details>
-  <summary>指示文テンプレート</summary>
+  <summary>指示文のひな型</summary>
   <p>コピーすると {固定色}、{画風メモ}、{世界観メモ} が作品の登録内容に置き換わります。</p>
   <div id="production-templates"></div>
  </details>
@@ -107,51 +107,49 @@
 </div>
 <div class="workflow-panel" id="workflow-panel-create" role="tabpanel" aria-labelledby="workflow-create" hidden>
 <div id="part-list-screen">
-<nav class="workflow-shortcuts" hidden aria-label="この工程の項目"><a href="#picker-title">カラースキン</a><a href="#assets-heading">原画スロット</a><a href="#production-tools">加工補助</a></nav>
-<section class="picker-section" aria-label="カラースキン一覧" hidden><div class="picker-title" id="picker-title"><h2>カラースキン</h2><p>9系統・全50種類。タップするとプレビューが切り替わります。</p></div><label class="skin-filter-label" for="skin-filter">色の系統</label> <select id="skin-filter"><option value="">すべての系統</option></select><div id="skin-groups" class="skin-groups"></div></section>
 <section class="assets-section" aria-labelledby="assets-heading" hidden>
- <h2 id="assets-heading">制作リスト（全25枠）</h2>
- <p>好きな画像から制作・登録できます。構図を決めたいときは各枠の「個別設計・指示文」を開きます。</p>
+ <h2 id="assets-heading">作る画像一覧（全25点）</h2>
+ <p>好きな画像から始められます。</p>
  <div class="production-recommendation">
   <p id="production-recommendation"></p>
-  <button type="button" id="production-recommendation-jump" hidden>おすすめの画像枠へ</button>
+  <button type="button" id="production-recommendation-jump" hidden>おすすめの画像を作る</button>
  </div>
  <div id="asset-slots" class="asset-groups">
   <section class="asset-group"><h3>メイン画像・背景</h3><div id="asset-surfaces" class="asset-slots">
-   <article class="asset-card" data-slot="talkBackground"><h4>トーク背景</h4><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p id="background-preview-error" class="notice" role="status" hidden></p><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></article>
+   <article class="asset-card" data-slot="talkBackground"><h4>トーク背景</h4><div id="background-thumbnail" class="asset-preview">画像未登録</div><div class="background-actions"><span id="background-status" role="status">背景画像：未登録</span><button id="remove-background" type="button" hidden>背景を外す</button></div><p id="background-preview-error" class="notice" role="status" hidden></p><button class="upload-button" id="choose-background" type="button">背景画像を登録</button><input type="file" id="background-input" hidden></article>
   </div></section>
   <section class="asset-group"><h3>パスコード</h3><div id="asset-passcode" class="asset-slots"></div></section>
   <section class="asset-group"><h3>プロフィール</h3><div id="asset-profile" class="asset-slots"></div></section>
  </div>
  <details class="menu-assets">
-  <summary>メニューアイコン（18枠）</summary>
+  <summary>メニューアイコン（9種類・各2枚）</summary>
   <div id="menu-slots" class="menu-pairs"></div>
  </details>
 </section>
 </div>
 <section id="part-workspace" aria-label="画像枠の制作" hidden></section>
 <section class="production-section" id="production-tools" hidden> <details>
-  <summary>原画の加工補助</summary>
+  <summary>画像の加工・調整</summary>
   <label>加工方法
    <select id="production-tool">
     <option value="color">OFFアイコンの色を置換してON版を作る</option>
     <option value="transparent">外周につながる白を透明にする</option>
    </select>
   </label>
-  <label>対象の原画 <select id="production-source"></select></label>
+  <label>加工する画像 <select id="production-source"></select></label>
   <div id="production-color-fields">
    <div class="production-controls">
     <label>置き換え元 <input id="production-from" type="text" value="#FFFFFF" spellcheck="false"></label>
     <label>置き換え先 <input id="production-to" type="text" value="#000000" spellcheck="false"></label>
    </div>
    <label>置き換え先の固定色 <select id="production-fixed-color"></select></label>
-   <label>色差の許容範囲 <input id="production-tolerance" type="range" min="0" max="255" step="1" value="12"> <output id="production-tolerance-value">12</output></label>
+   <label>似た色も変える範囲 <input id="production-tolerance" type="range" min="0" max="255" step="1" value="12"> <output id="production-tolerance-value">12</output></label>
   </div>
-  <label id="production-threshold-field" hidden>白と判定するしきい値 <input id="production-threshold" type="range" min="0" max="255" step="1" value="248"> <output id="production-threshold-value">248</output></label>
+  <label id="production-threshold-field" hidden>白として取り除く範囲 <input id="production-threshold" type="range" min="0" max="255" step="1" value="248"> <output id="production-threshold-value">248</output></label>
   <div class="production-controls">
-   <button type="button" id="production-preview-draft" disabled>下書きをプレビュー</button>
-   <button type="button" id="production-adopt-draft" disabled>下書きを採用</button>
-   <button type="button" id="production-undo" hidden>直前の透過を取り消す</button>
+   <button type="button" id="production-preview-draft" disabled>加工結果を見る</button>
+   <button type="button" id="production-adopt-draft" disabled>加工結果を反映</button>
+   <button type="button" id="production-undo" hidden>透明にする前の画像に戻す</button>
   </div>
   <p id="production-draft-status" role="status"></p>
   <img id="production-draft" alt="加工後の下書き" hidden>
@@ -159,17 +157,15 @@
 </section></div>
 <div class="workflow-panel" id="workflow-panel-check" role="tabpanel" aria-labelledby="workflow-check" hidden>
 <section class="preview-section" hidden aria-label="画面プレビュー">
- <div class="preview-source-controls">
-  <label for="preview-source-slot">直したい原画</label>
-  <select id="preview-source-slot"></select>
-  <button type="button" id="preview-source-jump">制作の画像枠へ</button>
- </div>
+ <h2>着せかえの見た目</h2>
+ <p>現在の配色：<span id="selected-name"></span></p>
+ <details id="palette-picker" class="picker-section" hidden><summary>配色を変更</summary><div class="picker-title" id="picker-title"><p>全50種類。選んだ配色はプレビューと作品に反映されます。</p></div><label class="skin-filter-label" for="skin-filter">色のグループ</label> <select id="skin-filter"><option value="">すべての系統</option></select><div id="skin-groups" class="skin-groups"></div></details>
  <div class="preview-tabs" role="tablist" aria-label="画面プレビュー">
   <button type="button" role="tab" id="tab-talk" aria-controls="panel-talk" aria-selected="true">トーク</button>
   <button type="button" role="tab" id="tab-passcode" aria-controls="panel-passcode" aria-selected="false" tabindex="-1">パスコード</button>
   <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1">メニュー</button>
  </div>
- <div id="panel-talk" role="tabpanel" aria-labelledby="tab-talk"><div class="section-heading"><div><h2>完成イメージ</h2><p id="selected-name">スキンを選択してください</p></div></div><div class="phone-frame"><div class="talk-header" id="talk-header"><span class="back-mark" aria-hidden="true">‹</span><strong>トーク</strong><span class="header-dots" aria-hidden="true">•••</span></div><div class="talk-area" id="talk-area"><div class="message-row other"><div class="avatar" aria-hidden="true">相</div><div class="bubble" id="other-bubble">こんにちは</div></div><div class="message-row own"><div class="bubble" id="own-bubble">よろしく！</div></div></div><div class="talk-footer" aria-label="入力欄の仮表示"><span>＋</span><div class="input-mock"></div><span>☺</span></div></div><p class="notice">配色は実測値ベースの参考表示です。</p></div>
+ <div id="panel-talk" role="tabpanel" aria-labelledby="tab-talk"><div class="phone-frame"><div class="talk-header" id="talk-header"><span class="back-mark" aria-hidden="true">‹</span><strong>トーク</strong><span class="header-dots" aria-hidden="true">•••</span></div><div class="talk-area" id="talk-area"><div class="message-row other"><div class="avatar" aria-hidden="true">相</div><div class="bubble" id="other-bubble">こんにちは</div></div><div class="message-row own"><div class="bubble" id="own-bubble">よろしく！</div></div></div><div class="talk-footer" aria-label="入力欄の仮表示"><span>＋</span><div class="input-mock"></div><span>☺</span></div></div><p class="notice">配色は実測値ベースの参考表示です。</p></div>
  <div id="panel-passcode" role="tabpanel" aria-labelledby="tab-passcode" hidden>
   <div class="phone-frame passcode-frame">
    <div id="passcode-upper" class="passcode-upper">
@@ -193,14 +189,19 @@
   <p class="notice">アイコンをタップしてOFF／ONを確認できます。横にスワイプすると全9種を表示できます。</p>
   <p id="menu-preview-error" class="notice" role="status" hidden></p>
  </div>
+ <div class="preview-source-controls">
+  <label for="preview-source-slot">直したい画像</label>
+  <select id="preview-source-slot"></select>
+  <button type="button" id="preview-source-jump">画像の制作画面へ</button>
+ </div>
 </section>
 </div>
 <div class="workflow-panel" id="workflow-panel-apply" role="tabpanel" aria-labelledby="workflow-apply" hidden>
-<nav class="workflow-shortcuts" hidden aria-label="この工程の項目"><a href="#sales-heading">販売情報</a><a href="#submission-heading">提出用ZIP</a></nav>
+<nav class="workflow-shortcuts" hidden aria-label="この工程の項目"><a href="#sales-heading">販売情報へ</a><a href="#submission-heading">提出用画像へ</a></nav>
 <section id="sales-section" class="production-section" aria-labelledby="sales-heading" hidden>
- <h2 id="sales-heading">販売情報・申請用コピー</h2>
- <p>使用スキン：<span id="sales-skin"></span></p>
- <label>言語 <select id="sales-language"></select></label>
+ <h2 id="sales-heading">販売情報を入力する</h2>
+ <p>現在の配色：<span id="sales-skin"></span></p>
+ <label>販売情報の言語 <select id="sales-language"></select></label>
  <p id="sales-required"></p>
  <div id="sales-fields"></div>
  <p class="backup-help">全角を2文字として数えた参考値です。結合文字などの扱いは申請画面で確認してください。</p>
@@ -217,9 +218,10 @@
  <textarea id="sales-fallback" aria-label="手動でコピーする販売情報" readonly hidden></textarea>
 </section>
 <section id="submission-export" class="submission-section" aria-labelledby="submission-heading" hidden>
- <h2 id="submission-heading">提出用ZIP</h2>
+ <h2 id="submission-heading">申請に使う画像ファイル</h2>
+ <p>作成したZIPはCreators Marketの申請に使います。送信はCreators Marketで行います。</p>
  <details id="export-adjustments">
-  <summary>切り出し位置と白判定を調整</summary>
+  <summary>切り出し・背景処理を調整（任意）</summary>
   <div class="export-crop">
    <label>切り出しプレビュー <select id="export-crop-file"></select></label>
    <label>上下の位置 <input id="export-crop-position" type="range" min="0" step="1" disabled></label>
@@ -229,13 +231,13 @@
   <div id="export-extra-settings"></div>
   <p class="backup-help">白判定の値を下げると、外周につながる白に近い領域がより広く処理されます。</p>
  </details>
- <button id="submission-generate" type="button">62点を生成して検証する</button>
+ <button id="submission-generate" type="button">提出用の画像62点を作成</button>
  <a id="submission-download" hidden>提出用ZIPをダウンロード</a>
  <p id="submission-status" role="status" aria-live="polite"></p>
  <ul id="submission-missing" aria-label="未登録の原画" hidden></ul>
  <div class="submission-table">
   <table id="submission-results" hidden>
-   <caption>生成結果</caption>
+   <caption>画像のチェック結果</caption>
    <thead><tr><th scope="col">ファイル名</th><th scope="col">寸法（px）</th><th scope="col">容量（B）</th><th scope="col">検証</th></tr></thead>
    <tbody></tbody>
   </table>
@@ -249,23 +251,23 @@
  <p id="part-next-action" role="status"></p>
  <p id="part-draft-status" role="status"></p>
  <details id="part-conflict" hidden><summary>現在保存されている内容</summary><ul id="part-saved-values"></ul></details>
- <button type="button" id="part-rebase" hidden>保存内容を確認して下書きを続ける</button>
- <button type="button" id="part-discard" hidden>この枠の下書きを破棄</button>
+ <button type="button" id="part-rebase" hidden>保存内容を確認して編集を続ける</button>
+ <button type="button" id="part-discard" hidden>未保存の入力を破棄</button>
  <div class="production-controls" id="part-consultation">
-  <button type="button" id="part-copy-consultation">この枠の相談文をコピー</button>
-  <button type="button" id="part-copy-revision" hidden>この枠の修正相談文をコピー</button>
+  <button type="button" id="part-copy-consultation">構図の相談文をコピー</button>
+  <button type="button" id="part-copy-revision" hidden>修正の相談文をコピー</button>
   <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く</a>
  </div>
  <details id="part-import">
-  <summary>個別設計JSONを取り込む</summary>
-  <label for="part-import-input">ChatGPTから受け取った1枠分の設計</label>
+  <summary>ChatGPTの回答を貼り付け</summary>
+  <label for="part-import-input">この画像についての回答</label>
   <textarea id="part-import-input" rows="4" spellcheck="false" autocapitalize="off"></textarea>
-  <button type="button" id="part-import-preview">取り込む内容を確認</button>
+  <button type="button" id="part-import-preview">変更内容を確認</button>
   <div id="part-import-review" hidden>
    <p id="part-import-target"></p>
-   <p>まだ保存されていません。「この枠に取り込む」を押すと保存されます。</p>
+   <p>まだ保存されていません。「この画像の設定を保存」を押すと保存されます。</p>
    <ul id="part-import-changes"></ul>
-   <button type="button" id="part-import-apply">この枠に取り込む</button>
+   <button type="button" id="part-import-apply">この画像の設定を保存</button>
    <button type="button" id="part-import-cancel">確認を取り消す</button>
   </div>
   <p id="part-import-status" role="status"></p>
@@ -278,8 +280,8 @@
  </div>
  <label id="part-reference-field" hidden><input id="part-reference" type="checkbox"> 登録したキャラ表画像を使う。コピーした文面と一緒にChatGPTへ画像を添付します。</label>
  <div class="production-controls">
-  <button type="button" id="part-save">個別設計を保存</button>
-  <button type="button" id="part-copy">画像生成の指示文をコピー</button>
+  <button type="button" id="part-save">手入力した設定を保存</button>
+  <button type="button" id="part-copy">画像作成の指示をコピー</button>
   <button type="button" id="part-close">閉じる</button>
  </div>
  <p id="part-status" role="status"></p>

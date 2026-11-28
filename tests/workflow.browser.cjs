@@ -68,16 +68,39 @@ test('制作工程・作品切替・プレビュー・狭い画面',async()=>{
   for(const pair of await page.locator('.menu-pair').all()){
    assert.deepEqual(await pair.locator('h4').allTextContents(),['OFF','ON']);
   }
+  assert.equal(await page.locator('.skin-tile:visible').count(),0);
+  await select('check');
+  assert.equal(await page.locator('.skin-tile:visible').count(),0);
+  await page.locator('#palette-picker summary').click();
   assert.equal(await page.locator('.skin-tile:visible').count(),50);
   await page.locator('#skin-filter').selectOption('Green');
   assert.equal(await page.locator('#skin-groups > section:visible').count(),1);
   assert.match(await page.locator('#skin-groups > section:visible h3').textContent(),/Green/);
   await page.locator('#skin-filter').selectOption('');
   assert.equal(await page.locator('.skin-tile:visible').count(),50);
+  const oldColor=await page.locator('#talk-header').evaluate(el=>el.style.backgroundColor);
+  await page.locator('[data-skin-id="green_03"]').click();
+  await page.waitForFunction(()=>document.querySelector('#selected-name').textContent==='Green 03');
+  assert.notEqual(await page.locator('#talk-header').evaluate(el=>el.style.backgroundColor),oldColor);
+  assert.equal(await page.locator('.skin-tile:visible').count(),0);
+  await page.locator('#tab-passcode').click();
+  assert.equal(await page.locator('#passcode-upper').evaluate(el=>el.style.backgroundColor),'rgb(250, 252, 242)');
+  await page.waitForFunction(()=>document.querySelector('#save-status').textContent==='自動保存済み');
+  await page.reload();
+  await page.waitForFunction(()=>document.querySelector('#save-status').textContent==='自動保存が有効です');
+  await select('check');
+  assert.equal(await page.locator('#selected-name').textContent(),'Green 03');
+  assert.equal(await page.locator('.skin-tile:visible').count(),0);
+  await select('create');
+  assert.equal(await page.locator('#choose-background').isVisible(),false);
+  assert.equal(await page.locator('#production-tools details').evaluate(el=>el.open),false);
+  await page.locator('[data-slot="talkBackground"] .part-open').click();
   const fileChooser=page.waitForEvent('filechooser');
   await page.locator('#choose-background').click();
   await (await fileChooser).setFiles(file);
   await page.waitForFunction(()=>document.querySelector('#progress-images').textContent.includes('1/25'));
+  await page.waitForFunction(()=>document.querySelector('#background-thumbnail').style.backgroundImage.startsWith('url'));
+  await page.locator('#part-back').click();
   const fixture=process.env.FULL_BACKUP;
   if(fixture){
    await select('prepare');

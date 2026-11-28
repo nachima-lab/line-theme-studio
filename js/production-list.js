@@ -42,7 +42,7 @@ export function setupProductionList({selectColorSource,toggleRedo,openPart}){
     color=document.createElement('button');
     color.type='button';
     color.className='production-card-action';
-    color.textContent='このOFFからONを作る';
+    color.textContent='OFF画像を色替えしてON版を作る';
     color.setAttribute('aria-label',label+'からONを作る');
     color.addEventListener('click',()=>{
      if(selectColorSource(id))focusTarget(document.getElementById('production-source'));
@@ -67,7 +67,7 @@ export function setupProductionList({selectColorSource,toggleRedo,openPart}){
    const text=marked&&registered?'作り直し予定':registered?'登録済み':design?'下書きあり・未登録':'未登録';
    if(state.textContent!==text)state.textContent=text;
    redo.hidden=!registered;
-   redo.textContent=marked?'作り直し指定を解除':'作り直しに指定';
+   redo.textContent=marked?'作り直し指定を解除':'作り直し予定にする';
    redo.setAttribute('aria-pressed',String(marked));
    if(color)color.hidden=!registered;
   }

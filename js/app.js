@@ -19,6 +19,7 @@ let skins=[],skinIds=[],collection,revision;
 let saveQueue=Promise.resolve(),imageQueue=Promise.resolve();
 let dirty=false,busy=false,saveError=null;
 const groupsEl=document.getElementById('skin-groups');
+const palette=document.getElementById('palette-picker');
 
 const menuSlotsEl=document.getElementById('menu-slots');
 const main=document.querySelector('main');
@@ -49,11 +50,16 @@ const renderExport=setupExportPanel({
  saveSettings:exportSettings=>updateProject({exportSettings}),runOperation,renderProgress
 });
 
+const backgroundThumbnail=document.getElementById('background-thumbnail');
 const backgroundError=document.getElementById('background-preview-error');
 const backgroundPreview=createRecoverablePreview({
  label:'トーク背景',background:true,
- attach:(_,url)=>renderBackground(url),
- report:message=>{backgroundError.textContent=message;backgroundError.hidden=!message;},
+ attach:(_,url)=>{
+  renderBackground(url);
+  backgroundThumbnail.style.backgroundImage=url?'url("'+url+'")':'none';
+  backgroundThumbnail.textContent=url?'':'画像未登録';
+ },
+ report:message=>{backgroundError.textContent=message;backgroundError.hidden=!message;if(message)backgroundThumbnail.textContent=message;},
  savePreview:(projectId,item,preview)=>savePreviewRepair('talkBackground',projectId,item,preview)
 });
 
@@ -179,7 +185,7 @@ function showBackground(){
  const project=activeProject(),item=project?.images.talkBackground;
  backgroundPreview.show(project,item);
  document.getElementById('background-status').textContent=item?'背景画像：'+item.name:'背景画像：未登録';
- chooseBackground.textContent=item?'背景画像を差し替える':'背景画像を登録';
+ chooseBackground.textContent=item?'別の画像に差し替え':'画像を選んで登録';
  removeButton.hidden=!item;
 }
 
@@ -247,7 +253,7 @@ function renderAssetSlot(slotId){
  view.display.show(project,item);
  if(!item)view.preview.textContent='画像未登録';
  view.name.textContent=item?.name??'';
- const action=item?'画像を差し替える':'画像を登録する';
+ const action=item?'別の画像に差し替え':'画像を選んで登録';
  view.upload.textContent=action;
  view.upload.setAttribute('aria-label',view.label+'の'+action);
  view.remove.hidden=!item;
@@ -283,7 +289,7 @@ function initAssetSlots(){
   upload.addEventListener('click',()=>fileInput.click());
 
   const remove=document.createElement('button');remove.type='button';remove.className='asset-remove';
-  remove.textContent='画像を外す';
+  remove.textContent='この作品から画像を外す';
   remove.setAttribute('aria-label',slot.label+'の画像を外す');
   remove.addEventListener('click',()=>{removeImage(slot.id);upload.focus();});
 
@@ -318,7 +324,14 @@ function tile(skin){
  const strip=document.createElement('div');strip.className='tile-strip';strip.style.backgroundColor=color(skin,'header');
  for(const side of ['other','own']){const circle=document.createElement('span');circle.className='tile-circle';circle.textContent='T';circle.style.backgroundColor=color(skin,side==='other'?'otherBubble':'ownBubble');circle.style.color=color(skin,side==='other'?'textOnOtherBubble':'textOnOwnBubble');strip.append(circle);}
  sample.append(strip);const label=document.createElement('span');label.className='tile-name';label.textContent=skin.displayName;button.append(sample,label);
- button.addEventListener('click',()=>chooseSkin(skin.id));return button;
+ button.addEventListener('click',()=>{
+  chooseSkin(skin.id);
+  palette.open=false;
+  const summary=palette.querySelector('summary');
+  summary.focus({preventScroll:true});
+  summary.scrollIntoView({block:'nearest'});
+ });
+ return button;
 }
 function renderCollection(){
  list.replaceChildren(...collection.projects.map(project=>new Option(project.name,project.id)));

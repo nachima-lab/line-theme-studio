@@ -67,7 +67,7 @@ test('設計取り込みの差分・競合・原文・v5復元と画像無変更
   assert.equal(await find('production-style').inputValue(),'水彩');
   assert.equal(await find('production-world').inputValue(),'確認後の手入力');
   assert.deepEqual(await page.evaluate(()=>window.imageWrites),[]);
-  await page.getByText('キャラクター・モチーフ・補足を編集',{exact:true}).click();
+  await page.getByText('キャラクター・題材・補足を編集',{exact:true}).click();
   await find('design-notes').fill('手動で更新した補足');
   await find('design-save').click();
   await wait(page,'design-edit-status','設計情報を保存しました');
@@ -121,7 +121,7 @@ test('設計取り込みの差分・競合・原文・v5復元と画像無変更
   const other=await page.context().newPage();
   await other.goto(base);
   await wait(other,'save-status','自動保存が有効');
-  await other.getByText('キャラクター・モチーフ・補足を編集',{exact:true}).click();
+  await other.getByText('キャラクター・題材・補足を編集',{exact:true}).click();
   await other.locator('#design-notes').fill('別タブの更新');
   await other.locator('#design-save').click();
   await wait(other,'design-edit-status','設計情報を保存しました');

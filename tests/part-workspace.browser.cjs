@@ -47,7 +47,7 @@ test('専用画面の復帰・一覧位置・枠別の下書き・保存競合�
   assert.ok(Math.abs(after-before)<10,{before,after});
   await off.tap();
   await find('part-next-slot').tap();
-  assert.notEqual(await find('part-heading').textContent(),'メニューアイコン トーク OFFの個別設計');
+  assert.notEqual(await find('part-heading').textContent(),'メニューアイコン トーク OFFを作る');
   assert.equal(await field(page).inputValue(),'');
   await find('part-back').tap();
   await off.tap();
