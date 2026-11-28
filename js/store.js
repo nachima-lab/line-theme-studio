@@ -1,3 +1,4 @@
+import {createSplitStorage} from './split-storage.js';
 import {readAdjustments} from './export-spec.js';
 import {emptyProduction,HEX_COLOR,TEMPLATES} from './production-data.js';
 
@@ -20,7 +21,6 @@ export const IMAGE_SLOTS=[
  })))
 ];
 export const LEGACY_SLOT_IDS=['talkBackground','mainImage','menuIcon'];
-const DB_NAME='line-theme-studio',STORE='projects',LEGACY_KEY='current',COLLECTION_KEY='collection';
 export const COLLECTION_VERSION=2;
 
 export function createProject(name){
@@ -94,64 +94,6 @@ export function convertLegacy(project,skinIds){
  return {...createProject('引き継いだ作品'),skinId:project.skinId,images};
 }
 
-function openDatabase(){
- return new Promise((resolve,reject)=>{
-  const request=indexedDB.open(DB_NAME,1);
-  request.onupgradeneeded=()=>{request.result.createObjectStore(STORE);};
-  request.onsuccess=()=>resolve(request.result);
-  request.onerror=()=>reject(request.error);
- });
-}
-
-async function transact(action){
- const db=await openDatabase();
- try{
-  return await new Promise((resolve,reject)=>{
-   const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE);
-   let result,failure;
-   function read(key,callback){
-    const request=store.get(key);
-    request.onsuccess=()=>{
-     try{callback(request.result);}
-     catch(error){failure=error;tx.abort();}
-    };
-   }
-   tx.oncomplete=()=>resolve(result);
-   tx.onabort=()=>reject(failure??tx.error??new Error('保存が中断されました'));
-   action(store,read,value=>{result=value;});
-  });
- }finally{db.close();}
-}
-
-export function loadCollection(skinIds){
- return transact((store,read,complete)=>{
-  read(COLLECTION_KEY,current=>{
-   if(current!==undefined){
-    if(!Number.isSafeInteger(current?.revision)||current.revision<1)throw new Error('保存データの履歴が正しくありません');
-    complete({collection:validateCollection(current,skinIds),revision:current.revision});
-    return;
-   }
-   read(LEGACY_KEY,legacy=>{
-    const project=legacy===undefined?createProject('作品 1'):convertLegacy(legacy,skinIds);
-    const collection=validateCollection(defineCollection([project],project.id),skinIds);
-    store.add({...collection,revision:1},COLLECTION_KEY);
-    complete({collection,revision:1});
-   });
-  });
- });
-}
-
-export function saveCollection(collection,revision){
- return transact((store,read,complete)=>{
-  read(COLLECTION_KEY,current=>{
-   if(current?.revision!==revision)throw new Error('別のタブで作品が更新されました。未保存の変更はバックアップに書き出せます');
-   const next=revision+1;
-   store.put({...collection,revision:next},COLLECTION_KEY);
-   complete(next);
-  });
- });
-}
-
 function dataUrlToBlob(value){
  if(typeof value!=='string'||!/^data:image\/(png|jpeg|webp|heic|heif);base64,[A-Za-z0-9+/=]+$/.test(value)){
   throw new Error('画像のバックアップ形式が不正です');
@@ -172,35 +114,7 @@ export function parseLegacyJson(text,skinIds){
  return convertLegacy({...input,version:1,images:Object.fromEntries(entries)},skinIds);
 }
 
-// 診断用。通常の起動処理と分け、空のDBを作るトランザクションも中止する。
-export async function readSavedProjectsForDiagnosis(){
- const db=await new Promise((resolve,reject)=>{
-  const request=indexedDB.open(DB_NAME);
-  let absent=false;
-  request.onupgradeneeded=()=>{
-   absent=true;
-   request.transaction.abort();
-  };
-  request.onsuccess=()=>resolve(request.result);
-  request.onerror=()=>absent?resolve(null):reject(request.error);
- });
- if(!db)return {projects:[],activeId:null};
- try{
-  if(!db.objectStoreNames.contains(STORE))return {projects:[],activeId:null};
-  return await new Promise((resolve,reject)=>{
-   const tx=db.transaction(STORE,'readonly'),store=tx.objectStore(STORE);
-   const current=store.get(COLLECTION_KEY),legacy=store.get(LEGACY_KEY);
-   tx.onabort=()=>reject(tx.error??new Error('保存データの読み出しが中断されました'));
-   tx.oncomplete=()=>{
-    if(current.result!==undefined){
-     if(!Array.isArray(current.result?.projects)){
-      reject(new Error('保存された作品一覧の形式を確認できません'));return;
-     }
-     resolve({projects:current.result.projects,activeId:current.result.activeId});
-    }else if(legacy.result){
-     resolve({projects:[{id:'legacy',name:'旧形式の作品',images:legacy.result.images}],activeId:'legacy'});
-    }else resolve({projects:[],activeId:null});
-   };
-  });
- }finally{db.close();}
-}
+export const {loadCollection,saveCollection,readSavedProjectsForDiagnosis}=createSplitStorage({
+ createProject,defineCollection,validateCollection,convertLegacy,
+ slotLabels:new Map(IMAGE_SLOTS.map(({id,label})=>[id,label]))
+});

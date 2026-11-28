@@ -25,12 +25,13 @@ async function decodeBytes(buffer,mime){
 }
 
 export async function diagnoseImage(item){
- const blob=item?.blob;
+ const blob=item?.blob,expected=item?.integrity;
  const result={
   name:item?.name??'—',
   declared:blob instanceof Blob?blob.size:'—',
   mime:blob instanceof Blob?(blob.type||'空欄'):'—',
-  actual:'—',signature:'—',format:'—',read:'未実施',decode:'未実施',sha:'—'
+  actual:'—',signature:'—',format:'—',read:'未実施',decode:'未実施',sha:'—',
+  integrity:expected?.issue?'不一致（'+expected.issue+'）':expected?'未確認':'—'
  };
  if(!item){result.read='未登録';return result;}
  if(!(blob instanceof Blob)){result.read='失敗（MissingBlob）';return result;}
@@ -51,6 +52,12 @@ export async function diagnoseImage(item){
  try{
   result.sha=hex(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer)));
  }catch(error){result.sha='失敗（'+errorName(error)+'）';}
+ if(expected&&!expected.issue){
+  if(expected.size!==result.actual)result.integrity='不一致（画像のサイズが一致しません）';
+  else if(expected.sha256==null)result.integrity='サイズ一致（SHA-256未記録）';
+  else if(!/^[0-9a-f]{64}$/.test(result.sha))result.integrity='未確認（SHA-256を計算できません）';
+  else result.integrity=result.sha===expected.sha256?'サイズ・SHA-256一致':'不一致（画像のSHA-256が一致しません）';
+ }
  result.decode=await decodeBytes(buffer,blob.type);
  return result;
 }
