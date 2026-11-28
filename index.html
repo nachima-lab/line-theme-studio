@@ -77,6 +77,7 @@
  <details>
   <summary>制作メモ・キャラ表</summary>
   <h3>キャラ表</h3>
+  <button type="button" id="design-character-prompt">キャラ表作成の指示文</button>
   <div id="production-character-image" hidden></div>
   <p id="production-character-error" role="status" hidden></p>
   <p id="production-character-name">未登録</p>
@@ -227,4 +228,21 @@
  </div>
 </section>
 </div>
+<dialog id="part-dialog" aria-labelledby="part-heading">
+ <h2 id="part-heading"></h2>
+ <div id="part-fields"></div>
+ <div id="part-character-field">
+  <label for="part-character-selection">登場するキャラクター</label>
+  <select id="part-character-selection"><option value="all">共通設計に合わせる</option><option value="specified">ここで選ぶ（選択なしなら登場させない）</option></select>
+  <div id="part-characters" hidden></div>
+ </div>
+ <label id="part-reference-field" hidden><input id="part-reference" type="checkbox"> 登録したキャラ表画像を使う。コピーした文面と一緒にChatGPTへ画像を添付します。</label>
+ <div class="production-controls">
+  <button type="button" id="part-save">個別設計を保存</button>
+  <button type="button" id="part-copy">画像生成の指示文をコピー</button>
+  <button type="button" id="part-close">閉じる</button>
+ </div>
+ <p id="part-status" role="status"></p>
+ <textarea id="part-fallback" aria-label="手動でコピーする指示文" rows="5" readonly hidden></textarea>
+</dialog>
 </main><script type="module" src="./js/app.js"></script></body></html>

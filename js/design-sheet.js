@@ -39,8 +39,10 @@ function characters(value,path){
  });
 }
 const motifs=(value,path)=>array(value,path,24,(item,key)=>text(item,key,120,true));
+export const PART_FIELDS=['composition','characterIds','motifs','placement','expression','stateNotes'];
+
 function parts(value,path,slots){
- const spec=['composition','characterIds','motifs','placement','expression','stateNotes'];
+ const spec=PART_FIELDS;
  return Object.fromEntries(Object.entries(object(value,path,slots)).map(([slot,item])=>{
   const key=path+'.'+slot;
   object(item,key,spec);

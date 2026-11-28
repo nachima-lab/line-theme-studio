@@ -1,3 +1,4 @@
+import {setupPartPanel} from './part-panel.js';
 import {setupDesignPanel} from './design-panel.js';
 import {setupSalesPanel} from './sales-panel.js';
 import {setupWorkflowTabs} from './workflow-tabs.js';
@@ -39,6 +40,7 @@ const extraPreviews=setupExtraPreviews();
 const renderSales=setupSalesPanel({save:sales=>updateProject({sales})});
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
 const renderDesign=setupDesignPanel({slots:IMAGE_SLOTS,commit:commitDesign});
+const initPartButtons=setupPartPanel({slots:IMAGE_SLOTS,activeProject,commit:commitDesign});
 const renderProgress=setupWorkflowProgress();
 const renderExport=setupExportPanel({
  saveSettings:exportSettings=>updateProject({exportSettings}),runOperation,renderProgress
@@ -131,19 +133,21 @@ function changeCollection(build){
 }
 
 async function commitDesign(projectId,build,complete){
- if(busy||!collection)return;
- let success=false;
+ if(busy||!collection){complete(false);return;}
+ let success=false,failure;
  await runOperation('設計情報を保存中…',async()=>{
-  if(saveError)throw saveError;
-  const project=activeProject();
-  if(project?.id!==projectId)throw new Error('対象の作品を開き直してください。');
-  const updated=build(project);
-  const next=defineCollection(collection.projects.map(item=>item.id===projectId?updated:item),projectId);
-  await commitCollection(next);
-  success=true;
-  return '自動保存済み';
+  try{
+   if(saveError)throw saveError;
+   const project=activeProject();
+   if(project?.id!==projectId)throw new Error('対象の作品を開き直してください。');
+   const updated=build(project);
+   const next=defineCollection(collection.projects.map(item=>item.id===projectId?updated:item),projectId);
+   await commitCollection(next);
+   success=true;
+   return '自動保存済み';
+  }catch(error){failure=error;throw error;}
  });
- complete(success);
+ complete(success,failure);
 }
 
 function updateProject(changes){
@@ -332,6 +336,7 @@ async function init(){
   }
   ({collection,revision}=await loadCollection(skinIds));
   initAssetSlots();
+  initPartButtons();
   renderCollection();
   newButton.disabled=exportButton.disabled=chooseBackup.disabled=false;
   status('自動保存が有効です');

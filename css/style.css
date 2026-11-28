@@ -153,3 +153,11 @@ main{display:block;padding-inline:max(15px,env(safe-area-inset-left));padding-ri
 #design-panel li{margin:8px 0;padding:8px;border:1px solid #e2dbd0;border-radius:8px}
 #design-differences label{display:flex;align-items:center;gap:8px;min-height:44px;margin:0}
 #design-differences p,#design-parts p{white-space:pre-wrap;overflow-wrap:anywhere}
+
+.part-open,#part-dialog button{min-height:44px;font:inherit}
+.part-open{margin-top:8px;max-width:100%;width:100%;overflow-wrap:anywhere}
+#part-dialog{width:min(36rem,calc(100% - 24px));max-height:calc(100dvh - 24px);padding:16px;border:1px solid #c8bab0;border-radius:12px;overscroll-behavior:contain}
+#part-dialog::backdrop{background:#221d1a99}
+#part-dialog label{display:block;margin:10px 0}
+#part-dialog textarea,#part-dialog select{display:block;width:100%;font-size:16px}
+#part-characters label,#part-reference-field{min-height:44px}
