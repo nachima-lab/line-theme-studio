@@ -1,4 +1,5 @@
 import {setupSalesPanel} from './sales-panel.js';
+import {setupWorkflowTabs} from './workflow-tabs.js';
 import {loadSkins,groupedSkins,color} from './skins.js';
 import {renderPreview,renderBackground} from './preview.js';
 import {IMAGE_ACCEPT,IMAGE_SLOTS,createProject,defineCollection,loadCollection,saveCollection,parseLegacyJson} from './store.js';
@@ -31,6 +32,7 @@ const newButton=document.getElementById('new-project');
 const renameButton=document.getElementById('rename-project');
 const deleteButton=document.getElementById('delete-project');
 setupPreviewTabs();
+setupWorkflowTabs();
 const extraPreviews=setupExtraPreviews();
 const renderSales=setupSalesPanel({save:sales=>updateProject({sales})});
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});

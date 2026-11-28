@@ -113,3 +113,19 @@
 .sales-field input,.sales-field textarea{display:block;width:100%;max-width:100%}
 #sales-section input[type=text]{width:100%;box-sizing:border-box;padding:8px}
 #sales-required{color:#8f3024}
+
+/* Outer workflow panels own only the visibility of the selected stage. */
+:root{scroll-padding-top:calc(58px + env(safe-area-inset-top));scroll-padding-bottom:16px}
+main{display:block;padding-inline:max(15px,env(safe-area-inset-left));padding-right:max(15px,env(safe-area-inset-right))}
+.workflow-context{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-bottom:10px}
+.workflow-context select{min-height:44px;max-width:100%;font-size:16px}
+.workflow-context .save-status,.workflow-context #load-error{flex-basis:100%;margin:0}
+.workflow-bar{position:sticky;top:0;z-index:5;background:#f7f5f1;padding:env(safe-area-inset-top) 0 6px}
+.workflow-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.workflow-tabs button{min-height:44px;border:1px solid #d6cdc1;border-radius:8px;color:#3e3329;background:#fff;font:inherit;cursor:pointer}
+.workflow-tabs button[aria-selected="true"]{background:#382a21;color:#fff;border-color:#382a21;font-weight:700}
+.workflow-panel{display:grid;gap:18px;padding-top:12px;min-width:0}
+.workflow-panel .preview-section{position:static}
+.workflow-panel .assets-section,.workflow-panel .picker-section{margin-top:0}
+.workflow-panel :is(input:not([type=file]),select,textarea){font-size:16px}
+@media(max-height:320px){.workflow-bar{position:static}:root{scroll-padding-top:12px}}

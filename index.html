@@ -2,18 +2,28 @@
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f5f1"><title>LINE着せかえ制作室</title><link rel="stylesheet" href="./css/style.css"></head>
 <body><header class="app-header"><div><p class="eyebrow">LINE着せかえ制作室 · Phase 6</p><h1>LINE着せかえ制作室</h1></div><span class="count" id="skin-count">読み込み中</span></header>
 <main>
+<div class="workflow-context">
+  <label for="project-list">作品一覧</label>
+  <select id="project-list" disabled></select>
+  <p id="save-status" class="save-status" role="status">保存状態を確認中…</p>
+ <p id="load-error" class="error" role="alert" hidden></p>
+</div>
+<div class="workflow-bar"><div class="workflow-tabs" role="tablist" aria-label="制作工程">
+ <button type="button" role="tab" id="workflow-prepare" aria-controls="workflow-panel-prepare" aria-selected="true" tabindex="0">準備</button>
+ <button type="button" role="tab" id="workflow-create" aria-controls="workflow-panel-create" aria-selected="false" tabindex="-1">制作</button>
+ <button type="button" role="tab" id="workflow-check" aria-controls="workflow-panel-check" aria-selected="false" tabindex="-1">確認</button>
+ <button type="button" role="tab" id="workflow-apply" aria-controls="workflow-panel-apply" aria-selected="false" tabindex="-1">申請</button>
+</div></div>
+<div class="workflow-panel" id="workflow-panel-prepare" role="tabpanel" aria-labelledby="workflow-prepare">
 <section class="project-section" aria-labelledby="project-heading">
  <h2 id="project-heading">作品管理</h2>
  <div class="project-controls">
-  <label for="project-list">作品一覧</label>
-  <select id="project-list" disabled></select>
   <button type="button" id="new-project" disabled>新規作成</button>
   <button type="button" id="rename-project" disabled>名前を変更</button>
   <button type="button" id="delete-project" disabled>作品を削除</button>
  </div>
  <p id="empty-projects" hidden>作品がありません。新規作成またはバックアップの読み込みができます。</p>
  <div class="backup-panel">
-  <p id="save-status" class="save-status" role="status">保存状態を確認中…</p>
   <div class="backup-controls">
    <button type="button" id="export-backup" disabled>全作品ZIPを書き出す</button>
    <button type="button" id="choose-backup" disabled>バックアップを読み込む</button>
@@ -21,33 +31,77 @@
   </div>
   <div id="backup-omissions" hidden><p>ZIPに収録できなかった画像があります。</p><ul></ul></div><p class="backup-help">作品はこのブラウザに自動保存されます。全作品ZIPの読み込みは作品一覧を置き換えます。旧ZIPと旧JSONは1作品として追加します。</p>
  </div>
- <p id="load-error" class="error" role="alert" hidden></p>
 </section>
-<section id="submission-export" class="submission-section" aria-labelledby="submission-heading" hidden>
- <h2 id="submission-heading">提出用ZIP</h2>
- <details id="export-adjustments">
-  <summary>切り出し位置と白判定を調整</summary>
-  <div class="export-crop">
-   <label>切り出しプレビュー <select id="export-crop-file"></select></label>
-   <label>上下の位置 <input id="export-crop-position" type="range" min="0" step="1" disabled></label>
-   <p id="export-crop-message"></p>
-   <canvas id="export-crop-preview" role="img" aria-label="切り出し後の画像" hidden></canvas>
+<section class="production-section" aria-labelledby="production-heading" hidden>
+ <h2 id="production-heading">制作サポート</h2>
+ <details>
+  <summary>制作メモ・キャラ表</summary>
+  <h3>キャラ表</h3>
+  <div id="production-character-image" hidden></div>
+  <p id="production-character-error" role="status" hidden></p>
+  <p id="production-character-name">未登録</p>
+  <button type="button" id="production-choose-character">キャラ表を登録・差し替え</button>
+  <input type="file" id="production-character-input" hidden>
+  <button type="button" id="production-remove-character" hidden>キャラ表を外す</button>
+
+  <h3>固定色（最大8色）</h3>
+  <ul id="production-colors"></ul>
+  <div class="production-controls">
+   <label>色コード <input id="production-new-color" type="text" placeholder="#RRGGBB" spellcheck="false"></label>
+   <button type="button" id="production-add-color">色を追加</button>
   </div>
-  <div id="export-extra-settings"></div>
-  <p class="backup-help">白判定の値を下げると、外周につながる白に近い領域がより広く処理されます。</p>
+  <p id="production-color-error" role="status"></p>
+  <label>画風メモ <textarea id="production-style" rows="3"></textarea></label>
+  <label>世界観メモ <textarea id="production-world" rows="3"></textarea></label>
  </details>
- <button id="submission-generate" type="button">62点を生成して検証する</button>
- <a id="submission-download" hidden>提出用ZIPをダウンロード</a>
- <p id="submission-status" role="status" aria-live="polite"></p>
- <ul id="submission-missing" aria-label="未登録の原画" hidden></ul>
- <div class="submission-table">
-  <table id="submission-results" hidden>
-   <caption>生成結果</caption>
-   <thead><tr><th scope="col">ファイル名</th><th scope="col">寸法（px）</th><th scope="col">容量（B）</th><th scope="col">検証</th></tr></thead>
-   <tbody></tbody>
-  </table>
- </div>
+ <details>
+  <summary>指示文テンプレート</summary>
+  <p>コピーすると {固定色}、{画風メモ}、{世界観メモ} が作品の登録内容に置き換わります。</p>
+  <div id="production-templates"></div>
+ </details>
+ <p id="production-status" role="status"></p>
+ <textarea id="production-copy-fallback" aria-label="手動でコピーする内容" readonly hidden></textarea>
 </section>
+</div>
+<div class="workflow-panel" id="workflow-panel-create" role="tabpanel" aria-labelledby="workflow-create" hidden>
+<section class="picker-section" aria-label="カラースキン一覧" hidden><div class="picker-title"><h2>カラースキン</h2><p>9系統・全50種類。タップするとプレビューが切り替わります。</p></div><div id="skin-groups" class="skin-groups"></div></section>
+<section class="assets-section" aria-labelledby="assets-heading" hidden>
+ <h2 id="assets-heading">原画スロット（全25枠）</h2>
+ <p class="asset-help">トーク背景はトーク画面プレビューで管理します。</p>
+ <div id="asset-slots" class="asset-slots"></div>
+ <details class="menu-assets">
+  <summary>メニューアイコン（18枠）</summary>
+  <div id="menu-slots" class="asset-slots"></div>
+ </details>
+</section>
+<section class="production-section" hidden> <details>
+  <summary>原画の加工補助</summary>
+  <label>加工方法
+   <select id="production-tool">
+    <option value="color">OFFアイコンの色を置換してON版を作る</option>
+    <option value="transparent">外周につながる白を透明にする</option>
+   </select>
+  </label>
+  <label>対象の原画 <select id="production-source"></select></label>
+  <div id="production-color-fields">
+   <div class="production-controls">
+    <label>置き換え元 <input id="production-from" type="text" value="#FFFFFF" spellcheck="false"></label>
+    <label>置き換え先 <input id="production-to" type="text" value="#000000" spellcheck="false"></label>
+   </div>
+   <label>置き換え先の固定色 <select id="production-fixed-color"></select></label>
+   <label>色差の許容範囲 <input id="production-tolerance" type="range" min="0" max="255" step="1" value="12"> <output id="production-tolerance-value">12</output></label>
+  </div>
+  <label id="production-threshold-field" hidden>白と判定するしきい値 <input id="production-threshold" type="range" min="0" max="255" step="1" value="248"> <output id="production-threshold-value">248</output></label>
+  <div class="production-controls">
+   <button type="button" id="production-preview-draft" disabled>下書きをプレビュー</button>
+   <button type="button" id="production-adopt-draft" disabled>下書きを採用</button>
+   <button type="button" id="production-undo" hidden>直前の透過を取り消す</button>
+  </div>
+  <p id="production-draft-status" role="status"></p>
+  <img id="production-draft" alt="加工後の下書き" hidden>
+ </details>
+</section></div>
+<div class="workflow-panel" id="workflow-panel-check" role="tabpanel" aria-labelledby="workflow-check" hidden>
 <section class="preview-section" hidden aria-label="画面プレビュー">
  <div class="preview-tabs" role="tablist" aria-label="画面プレビュー">
   <button type="button" role="tab" id="tab-talk" aria-controls="panel-talk" aria-selected="true">トーク</button>
@@ -79,72 +133,8 @@
   <p id="menu-preview-error" class="notice" role="status" hidden></p>
  </div>
 </section>
-<section class="assets-section" aria-labelledby="assets-heading" hidden>
- <h2 id="assets-heading">原画スロット（全25枠）</h2>
- <p class="asset-help">トーク背景はトーク画面プレビューで管理します。</p>
- <div id="asset-slots" class="asset-slots"></div>
- <details class="menu-assets">
-  <summary>メニューアイコン（18枠）</summary>
-  <div id="menu-slots" class="asset-slots"></div>
- </details>
-</section>
-<section class="picker-section" aria-label="カラースキン一覧" hidden><div class="picker-title"><h2>カラースキン</h2><p>9系統・全50種類。タップするとプレビューが切り替わります。</p></div><div id="skin-groups" class="skin-groups"></div></section>
-<section class="production-section" aria-labelledby="production-heading" hidden>
- <h2 id="production-heading">制作サポート</h2>
- <details>
-  <summary>制作メモ・キャラ表</summary>
-  <h3>キャラ表</h3>
-  <div id="production-character-image" hidden></div>
-  <p id="production-character-error" role="status" hidden></p>
-  <p id="production-character-name">未登録</p>
-  <button type="button" id="production-choose-character">キャラ表を登録・差し替え</button>
-  <input type="file" id="production-character-input" hidden>
-  <button type="button" id="production-remove-character" hidden>キャラ表を外す</button>
-
-  <h3>固定色（最大8色）</h3>
-  <ul id="production-colors"></ul>
-  <div class="production-controls">
-   <label>色コード <input id="production-new-color" type="text" placeholder="#RRGGBB" spellcheck="false"></label>
-   <button type="button" id="production-add-color">色を追加</button>
-  </div>
-  <p id="production-color-error" role="status"></p>
-  <label>画風メモ <textarea id="production-style" rows="3"></textarea></label>
-  <label>世界観メモ <textarea id="production-world" rows="3"></textarea></label>
- </details>
- <details>
-  <summary>指示文テンプレート</summary>
-  <p>コピーすると {固定色}、{画風メモ}、{世界観メモ} が作品の登録内容に置き換わります。</p>
-  <div id="production-templates"></div>
- </details>
- <p id="production-status" role="status"></p>
- <textarea id="production-copy-fallback" aria-label="手動でコピーする内容" readonly hidden></textarea>
- <details>
-  <summary>原画の加工補助</summary>
-  <label>加工方法
-   <select id="production-tool">
-    <option value="color">OFFアイコンの色を置換してON版を作る</option>
-    <option value="transparent">外周につながる白を透明にする</option>
-   </select>
-  </label>
-  <label>対象の原画 <select id="production-source"></select></label>
-  <div id="production-color-fields">
-   <div class="production-controls">
-    <label>置き換え元 <input id="production-from" type="text" value="#FFFFFF" spellcheck="false"></label>
-    <label>置き換え先 <input id="production-to" type="text" value="#000000" spellcheck="false"></label>
-   </div>
-   <label>置き換え先の固定色 <select id="production-fixed-color"></select></label>
-   <label>色差の許容範囲 <input id="production-tolerance" type="range" min="0" max="255" step="1" value="12"> <output id="production-tolerance-value">12</output></label>
-  </div>
-  <label id="production-threshold-field" hidden>白と判定するしきい値 <input id="production-threshold" type="range" min="0" max="255" step="1" value="248"> <output id="production-threshold-value">248</output></label>
-  <div class="production-controls">
-   <button type="button" id="production-preview-draft" disabled>下書きをプレビュー</button>
-   <button type="button" id="production-adopt-draft" disabled>下書きを採用</button>
-   <button type="button" id="production-undo" hidden>直前の透過を取り消す</button>
-  </div>
-  <p id="production-draft-status" role="status"></p>
-  <img id="production-draft" alt="加工後の下書き" hidden>
- </details>
-</section>
+</div>
+<div class="workflow-panel" id="workflow-panel-apply" role="tabpanel" aria-labelledby="workflow-apply" hidden>
 <section id="sales-section" class="production-section" aria-labelledby="sales-heading" hidden>
  <h2 id="sales-heading">販売情報・申請用コピー</h2>
  <p>使用スキン：<span id="sales-skin"></span></p>
@@ -164,4 +154,30 @@
  <p id="sales-status" role="status"></p>
  <textarea id="sales-fallback" aria-label="手動でコピーする販売情報" readonly hidden></textarea>
 </section>
+<section id="submission-export" class="submission-section" aria-labelledby="submission-heading" hidden>
+ <h2 id="submission-heading">提出用ZIP</h2>
+ <details id="export-adjustments">
+  <summary>切り出し位置と白判定を調整</summary>
+  <div class="export-crop">
+   <label>切り出しプレビュー <select id="export-crop-file"></select></label>
+   <label>上下の位置 <input id="export-crop-position" type="range" min="0" step="1" disabled></label>
+   <p id="export-crop-message"></p>
+   <canvas id="export-crop-preview" role="img" aria-label="切り出し後の画像" hidden></canvas>
+  </div>
+  <div id="export-extra-settings"></div>
+  <p class="backup-help">白判定の値を下げると、外周につながる白に近い領域がより広く処理されます。</p>
+ </details>
+ <button id="submission-generate" type="button">62点を生成して検証する</button>
+ <a id="submission-download" hidden>提出用ZIPをダウンロード</a>
+ <p id="submission-status" role="status" aria-live="polite"></p>
+ <ul id="submission-missing" aria-label="未登録の原画" hidden></ul>
+ <div class="submission-table">
+  <table id="submission-results" hidden>
+   <caption>生成結果</caption>
+   <thead><tr><th scope="col">ファイル名</th><th scope="col">寸法（px）</th><th scope="col">容量（B）</th><th scope="col">検証</th></tr></thead>
+   <tbody></tbody>
+  </table>
+ </div>
+</section>
+</div>
 </main><script type="module" src="./js/app.js"></script></body></html>
