@@ -29,7 +29,8 @@ start.addEventListener('click',async()=>{
     '  読み出し: '+image.read+' / 実バイト数: '+image.actual,
     '  形式: '+image.format+' / 先頭バイト: '+image.signature,
     '  デコード: '+image.decode,
-    '  SHA-256: '+image.sha,'');
+    '  SHA-256: '+image.sha,
+    '  保存時の記録との照合: '+image.integrity,'');
    report.value=lines.join('\n');
   }
   status.textContent=slots.length+'枠の診断が完了しました。';

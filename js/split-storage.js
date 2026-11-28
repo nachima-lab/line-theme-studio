@@ -108,6 +108,16 @@ function validMime(bytes,type){
  return detected===type||(detected==='image/heic'&&type==='image/heif');
 }
 
+function referenceIssue(entry,ref){
+ if(!ref||!(entry?.blob instanceof Blob))return '参照先の画像データがありません';
+ if(entry.id!==ref.id||entry.size!==ref.size||entry.blob.size!==ref.size
+    ||entry.type!==ref.type||entry.blob.type!==ref.type){
+  return '画像のサイズまたは形式が一致しません';
+ }
+ if(entry.sha256!==ref.sha256)return '画像のSHA-256が一致しません';
+ return null;
+}
+
 function migrationError(error){
  const reason=error.name==='QuotaExceededError'
   ?'保存領域の空き容量が不足しています。'
@@ -141,6 +151,7 @@ export function createSplitStorage({createProject,defineCollection,validateColle
    return ref;
   }
   async function pack(item,label){
+   label+='（'+item.name+'）';
    const original=await imageRef(item.blob,label);
    const preview=item.preview?await imageRef(item.preview,label+'（縮小画像）'):undefined;
    return {name:item.name,original,preview};
@@ -171,13 +182,8 @@ export function createSplitStorage({createProject,defineCollection,validateColle
   const verified=new Map(),live=[];
   async function original(ref,label){
    const entry=snapshot.images.get(ref?.id);
-   if(!entry?.blob)throw new Error(label+'：参照先の画像データがありません');
-   if(!check)return entry.blob;
-   if(entry.id!==ref.id||entry.size!==ref.size||entry.blob.size!==ref.size
-      ||entry.type!==ref.type||entry.blob.type!==ref.type){
-    throw new Error(label+'：画像のサイズまたは形式が一致しません');
-   }
-   if(entry.sha256!==ref.sha256)throw new Error(label+'：画像のSHA-256が一致しません');
+   const issue=referenceIssue(entry,ref);
+   if(issue)throw new Error(label+'：'+issue);
    if(verified.has(ref.id))return verified.get(ref.id);
    const bytes=await readBytes(entry.blob,label);
    if(ref.sha256!==null&&await hash(bytes)!==ref.sha256){
@@ -189,6 +195,14 @@ export function createSplitStorage({createProject,defineCollection,validateColle
    return blob;
   }
   async function unpack(item,label){
+   if(!check){
+    const ref=item.original;
+    const entry=snapshot.images.get(ref?.id);
+    return {name:item.name,blob:entry?.blob,integrity:{
+     size:ref?.size,sha256:ref?.sha256,issue:referenceIssue(entry,ref)
+    }};
+   }
+   label+='（'+item.name+'）';
    const blob=await original(item.original,label);
    const preview=item.preview?await original(item.preview,label+'（縮小画像）'):undefined;
    return {name:item.name,blob,preview};

@@ -20,7 +20,8 @@ async function seed(page,corrupt=false){
  await page.evaluate(async corrupt=>{
   const canvas=document.createElement('canvas');canvas.width=canvas.height=12;
   const ctx=canvas.getContext('2d');ctx.fillStyle='#aa2345';ctx.fillRect(0,0,12,12);
-  const png=await new Promise(resolve=>canvas.toBlob(resolve));
+  const pixels=await new Promise(resolve=>canvas.toBlob(resolve));
+  const png=new Blob([pixels,Uint8Array.of(0,0)],{type:'image/png'});
   const create=indexedDB.open('line-theme-studio',1);
   const db=await new Promise((ok,err)=>{
    create.onupgradeneeded=()=>create.result.createObjectStore('projects');
@@ -29,7 +30,7 @@ async function seed(page,corrupt=false){
   const tx=db.transaction('projects','readwrite');
   tx.objectStore('projects').put({version:2,revision:9,activeId:'legacy-project',projects:[{
    id:'legacy-project',name:'移行テスト',skinId:'beige_01',exportSettings:{'i_22.png':33},
-   images:{mainImage:{name:'main.png',blob:corrupt?new Blob(['x'.repeat(png.size)],{type:'image/png'}):png},
+   images:{mainImage:{name:'main.png',blob:corrupt?new Blob(['x'.repeat(png.size)],{type:'image/png'}):png.slice(0,png.size,png.type)},
     talkBackground:{name:'talk.png',blob:png}},
    production:{colors:['#AABBCC'],style:'水彩',world:'桃の里',templates:{common:'{画風メモ}'},
     characterSheet:{name:'reference.png',blob:png},undo:{mainImage:{name:'undo.png',blob:png}}}
@@ -99,6 +100,8 @@ test('旧形式から移行し、メタ情報だけの編集と原画の差し�
  try{
   const page=await browser.newPage(browse);
   await enter(page);await seed(page);const before=await snapshot(page);await api(page);
+  await page.evaluate(()=>p1.loadCollection(skins));
+  await page.reload();await api(page);
   const writes=await page.evaluate(async()=>{
    const {loadCollection,saveCollection}=p1;
    const state=await loadCollection(skins);
@@ -174,9 +177,55 @@ test('保存した画像のサイズとSHA-256不一致を作品名・スロッ�
    await page.goto(base+'index.html');
    await page.locator('#load-error').waitFor();
    const error=await page.locator('#load-error').textContent();
-   assert.match(error,/移行テスト.*メイン画像/);
+   assert.match(error,/移行テスト.*メイン画像.*main\.png/);
    assert.match(error,mode==='size'?/サイズ/:/SHA-256/);
    assert.equal((await snapshot(page)).legacy.revision,9);
+   await page.close();
+  }
+ }finally{await browser.close();}
+});
+
+test('診断はデコード可能な同サイズの別データを不一致と表示し、欠損枠も飛ばさず報告する',async()=>{
+ const browser=await launch();
+ try{
+  for(const kind of ['替わった画像','欠損']){
+   const page=await browser.newPage(browse);
+   await enter(page);await seed(page);await api(page);
+   await page.evaluate(async kind=>{
+    await p1.loadCollection(skins);
+    const request=indexedDB.open('line-theme-studio');
+    const db=await new Promise((ok,err)=>{request.onsuccess=()=>ok(request.result);request.onerror=err;});
+    const tx=db.transaction(['collections_v2','project_meta_v2','image_blobs_v2'],'readwrite');
+    tx.objectStore('collections_v2').get('active').onsuccess=event=>{
+     const ns=event.target.result.namespace;
+     tx.objectStore('project_meta_v2').get([ns,'legacy-project']).onsuccess=event=>{
+      const key=[ns,event.target.result.images.mainImage.original.id],store=tx.objectStore('image_blobs_v2');
+      if(kind==='欠損'){store.delete(key);return;}
+      store.get(key).onsuccess=event=>{
+       const image=event.target.result;
+       image.blob=new Blob([image.blob.slice(0,-1),Uint8Array.of(1)],{type:image.type});
+       store.put(image,key);
+      };
+     };
+    };
+    await new Promise((ok,err)=>{tx.oncomplete=ok;tx.onabort=err;});db.close();
+   },kind);
+   const before=await snapshot(page);
+   await page.reload();
+   await page.locator('#diagnostic-start').click();
+   await page.getByText('25枠の診断が完了しました。').waitFor();
+   const report=await page.locator('#diagnostic-report').inputValue();
+   const main=report.split('[メイン画像] ')[1].split('[トーク背景] ')[0];
+   assert.match(main,/main\.png/);
+   if(kind==='欠損'){
+    assert.match(main,/MissingBlob/);
+    assert.match(main,/不一致（参照先の画像データがありません）/);
+   }else{
+    assert.match(main,/デコード: 成功/);
+    assert.match(main,/不一致（画像のSHA-256が一致しません）/);
+   }
+   assert.match(report,/\[トーク背景\] talk\.png[\s\S]+?サイズ・SHA-256一致/);
+   assert.deepEqual(await snapshot(page),before);
    await page.close();
   }
  }finally{await browser.close();}
