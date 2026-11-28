@@ -1,3 +1,4 @@
+import {setupDesignPanel} from './design-panel.js';
 import {setupSalesPanel} from './sales-panel.js';
 import {setupWorkflowTabs} from './workflow-tabs.js';
 import {setupWorkflowProgress} from './workflow-progress.js';
@@ -19,7 +20,7 @@ const groupsEl=document.getElementById('skin-groups');
 
 const menuSlotsEl=document.getElementById('menu-slots');
 const main=document.querySelector('main');
-const editors=main.querySelectorAll('.preview-section,.assets-section,.picker-section,.production-section,.workflow-shortcuts');
+const editors=main.querySelectorAll('.preview-section,.assets-section,.picker-section,.production-section:not(#design-panel),.workflow-shortcuts');
 const assetViews=new Map(),pendingImages=new Map();
 const statusEl=document.getElementById('save-status');
 const input=document.getElementById('background-input');
@@ -37,6 +38,7 @@ setupWorkflowTabs();
 const extraPreviews=setupExtraPreviews();
 const renderSales=setupSalesPanel({save:sales=>updateProject({sales})});
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
+const renderDesign=setupDesignPanel({slots:IMAGE_SLOTS,commit:commitDesign});
 const renderProgress=setupWorkflowProgress();
 const renderExport=setupExportPanel({
  saveSettings:exportSettings=>updateProject({exportSettings}),runOperation,renderProgress
@@ -128,6 +130,22 @@ function changeCollection(build){
  });
 }
 
+async function commitDesign(projectId,build,complete){
+ if(busy||!collection)return;
+ let success=false;
+ await runOperation('設計情報を保存中…',async()=>{
+  if(saveError)throw saveError;
+  const project=activeProject();
+  if(project?.id!==projectId)throw new Error('対象の作品を開き直してください。');
+  const updated=build(project);
+  const next=defineCollection(collection.projects.map(item=>item.id===projectId?updated:item),projectId);
+  await commitCollection(next);
+  success=true;
+  return '自動保存済み';
+ });
+ complete(success);
+}
+
 function updateProject(changes){
  const updated={...activeProject(),...changes};
  collection=defineCollection(collection.projects.map(project=>project.id===updated.id?updated:project),updated.id);
@@ -135,6 +153,7 @@ function updateProject(changes){
  renderExport(updated);
  extraPreviews.renderProject(updated);
  renderProduction(updated);
+ renderDesign(updated);
  renderSales(updated,skins.find(s=>s.id===updated.skinId)?.displayName);
 }
 
@@ -289,6 +308,7 @@ function renderCollection(){
  renderExport(project);
  extraPreviews.renderProject(project);
  renderProduction(project,true);
+ renderDesign(project);
  renderSales(project,skins.find(s=>s.id===project?.skinId)?.displayName);
  showBackground();
  for(const slotId of assetViews.keys())renderAssetSlot(slotId);

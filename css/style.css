@@ -146,3 +146,10 @@ main{display:block;padding-inline:max(15px,env(safe-area-inset-left));padding-ri
 .workflow-panel .skin-groups{max-height:none;overflow:visible}
 .workflow-shortcuts{display:flex;flex-wrap:wrap;gap:4px 12px}
 .workflow-shortcuts a{display:inline-flex;align-items:center;min-height:44px;color:#604a39}
+
+#design-panel textarea{min-width:0;font-size:16px}
+#design-panel .production-controls a{display:inline-flex;align-items:center;min-height:44px}
+#design-differences,#design-characters,#design-parts{padding-left:0;list-style:none}
+#design-panel li{margin:8px 0;padding:8px;border:1px solid #e2dbd0;border-radius:8px}
+#design-differences label{display:flex;align-items:center;gap:8px;min-height:44px;margin:0}
+#design-differences p,#design-parts p{white-space:pre-wrap;overflow-wrap:anywhere}

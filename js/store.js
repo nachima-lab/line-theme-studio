@@ -1,3 +1,4 @@
+import {validateDesign} from './design-sheet.js';
 import {emptySales,readSales} from './sales.js';
 import {createSplitStorage} from './split-storage.js';
 import {readAdjustments} from './export-spec.js';
@@ -50,7 +51,7 @@ function checkedImages(images,ids){
 
 function validateProduction(value,images,slots){
  if(value===undefined)return emptyProduction();
- const {colors,style,world,templates,characterSheet,undo}=value??{};
+ const {colors,style,world,templates,characterSheet,undo,design}=value??{};
  if(!Array.isArray(colors)||colors.length>8||colors.some(color=>typeof color!=='string'||!HEX_COLOR.test(color))
     ||typeof style!=='string'||typeof world!=='string'
     ||!templates||typeof templates!=='object'||Array.isArray(templates)
@@ -62,7 +63,8 @@ function validateProduction(value,images,slots){
   if(!keys.includes(key)||typeof text!=='string')throw new Error('指示文の形式が正しくありません');
  }
  return {colors:colors.map(color=>color.toUpperCase()),style,world,templates,characterSheet,
-  undo:checkedImages(undo,slots.filter(slot=>images[slot]))};
+  undo:checkedImages(undo,slots.filter(slot=>images[slot])),
+  ...(design===undefined?{}:{design:validateDesign(design,slots)})};
 }
 
 export function validateCollection(record,skinIds){

@@ -3,7 +3,8 @@ import {writeZip,readZipDirectory,readZipEntryBytes} from './zip.js';
 import {detectImageMime} from './image-format.js';
 import {verifyOriginal} from './image-preview.js';
 
-const FORMAT='line-theme-studio-zip',BACKUP_VERSION=4;
+const FORMAT='line-theme-studio-zip',BACKUP_VERSION=5;
+const LEGACY_MANIFEST_LIMIT=1024*1024,MANIFEST_LIMIT=8*LEGACY_MANIFEST_LIMIT;
 const mimeToExt=new Map([
  ['image/png','png'],['image/jpeg','jpg'],['image/webp','webp'],['image/heic','heic'],['image/heif','heif']
 ]);
@@ -64,7 +65,7 @@ export async function exportZip(collection,skinIds,{omitted=[]}={}){
  const meta={...clean,version:BACKUP_VERSION,format:FORMAT,exportedAt:new Date().toISOString(),projects};
  if(omitted.length)meta.omittedImages=omitted;
  const manifest=new Blob([JSON.stringify(meta)]);
- if(manifest.size>1024*1024)throw new Error('作品一覧が大きすぎます');
+ if(manifest.size>MANIFEST_LIMIT)throw new Error('作品一覧が大きすぎます');
  return writeZip([{name:'project.json',data:manifest},...entries]);
 }
 
@@ -111,19 +112,20 @@ async function restoreImages(images,ids,prefix,entries,file,projectLabel,suffix=
 export async function importZip(file,skinIds){
  const entries=await readZipDirectory(file);
  const raw=entries.get('project.json');
- if(!raw||raw.size>1024*1024)throw new Error('作品設定ファイルがありません、または大きすぎます');
+ if(!raw||raw.size>MANIFEST_LIMIT)throw new Error('作品設定ファイルがありません、または大きすぎます');
  const bytes=await readZipEntryBytes(file,raw);
  let meta;
  try{meta=JSON.parse(json.decode(bytes));}
  catch{throw new Error('作品設定のJSONが不正です');}
  entries.delete('project.json');
  let result;
+ if(meta?.version<5&&raw.size>LEGACY_MANIFEST_LIMIT)throw new Error('作品一覧が大きすぎます');
  if(meta?.format!==FORMAT)throw new Error('対応していないバックアップです');
  if(meta.version===1){
   const old=meta.project;
   const images=await restoreImages(old?.images,LEGACY_SLOT_IDS,'images/',entries,file,'旧形式の作品');
   result={legacy:convertLegacy({...old,version:1,images},skinIds)};
- }else if([2,3,BACKUP_VERSION].includes(meta.version)&&Array.isArray(meta.projects)){
+ }else if([2,3,4,BACKUP_VERSION].includes(meta.version)&&Array.isArray(meta.projects)){
   const projects=[];
   for(const [index,project] of meta.projects.entries()){
    const label='「'+(project?.name??'名称不明の作品')+'」';
@@ -135,9 +137,10 @@ export async function importZip(file,skinIds){
     const sheet=data.characterSheet;
     const characterSheet=sheet===null?null:await restoreImage(sheet,'references/'+index+'/character-sheet',entries,file,label+'のキャラ表');
     const undo=await restoreImages(data.undo,slotIds,'undo/'+index+'/',entries,file,label,'（取り消し用）');
-    production={...data,characterSheet,undo};
+    const {design,...legacyFields}=data;
+    production={...legacyFields,characterSheet,undo,...(meta.version===BACKUP_VERSION&&design!==undefined?{design}:{})};
    }
-   projects.push({...project,images,production,sales:meta.version===BACKUP_VERSION?project.sales:undefined});
+   projects.push({...project,images,production,sales:meta.version>=4?project.sales:undefined});
   }
   result={collection:validateCollection({...meta,version:COLLECTION_VERSION,projects},skinIds)};
  }else throw new Error('対応していないバックアップです');

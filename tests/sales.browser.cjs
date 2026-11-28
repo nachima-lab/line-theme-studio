@@ -67,7 +67,7 @@ async function checkTexts(page){
  }
 }
 
-test('4言語の保存・正確なコピー・警告・画像書き込みなし・v4往復',()=>usingPage(async page=>{
+test('4言語の保存・正確なコピー・警告・画像書き込みなし・v5往復',()=>usingPage(async page=>{
  await open(page,base);
  await stage(page,'apply');
  assert.equal(await field(page,'coins').inputValue(),'150');
@@ -119,11 +119,11 @@ test('4言語の保存・正確なコピー・警告・画像書き込みなし�
   const entries=await readZip(zip);
   return JSON.parse(await entries.get('project.json').text()).version;
  },buffer.toString('base64'));
- assert.equal(version,4);
+ assert.equal(version,5);
  await stage(page,'apply');
  await field(page,'title').fill('復元前に変更');
  await saved(page);
- await restore(page,{name:'sales-v4.zip',mimeType:'application/zip',buffer});
+ await restore(page,{name:'sales-v5.zip',mimeType:'application/zip',buffer});
  await checkTexts(page);
  assert.equal(await field(page,'copyright').inputValue(),'COPYRIGHT2026');
  assert.equal(await field(page,'coins').inputValue(),'150');
@@ -151,12 +151,12 @@ test('7b1378bで作成した販売情報のない作品を同じ保存領域か�
  assert.equal(await field(page,'title').inputValue(),'');
 }));
 
-for(const version of [2,3]){
+for(const version of [2,3,4]){
  const fixture=process.env['BACKUP_V'+version];
  test('既存v'+version+'バックアップを復元',{skip:!fixture},()=>usingPage(async page=>{
   await open(page,base);
   await restore(page,fixture);
   assert.ok(await page.locator(slot+' img').count());
-  assert.equal(await field(page,'coins').inputValue(),'');
+  assert.equal(await field(page,'coins').inputValue(),version===4?'150':'');
  }));
 }
