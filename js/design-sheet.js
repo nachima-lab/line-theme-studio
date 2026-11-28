@@ -78,6 +78,19 @@ export function parseDesignSheet(raw,slots){
  return Object.fromEntries(Object.entries(readers).filter(([key])=>own(data,key)).map(([key,read])=>[key,read(data[key])]));
 }
 
+export function serializeDesignSheet(project,slots){
+ const {world,style,colors,design}=project.production;
+ const sheet={
+  sheetVersion:1,workName:project.name,worldview:world,style,colors,
+  characters:design?.characters??[],motifs:design?.motifs??[],notes:design?.notes??'',
+  parts:design?.parts??{}
+ };
+ const indented=JSON.stringify(sheet,null,2);
+ const json=encoder.encode(indented).length<=MAX_SHEET_BYTES?indented:JSON.stringify(sheet);
+ parseDesignSheet(json,slots);
+ return json;
+}
+
 export function validateDesign(value,slots){
  object(value,'制作設計',['characters','motifs','notes','parts','redo','lastImport']);
  const result={

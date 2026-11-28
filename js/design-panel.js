@@ -1,6 +1,6 @@
-import {parseDesignSheet,designDiff,applyDesignDiff,validateDesign} from './design-sheet.js';
+import {parseDesignSheet,designDiff,applyDesignDiff,validateDesign,serializeDesignSheet} from './design-sheet.js';
 
-export function setupDesignPanel({slots,commit}){
+export function setupDesignPanel({slots,commit,canCopySaved}){
  const get=id=>document.getElementById('design-'+id);
  const section=get('panel'),input=get('input'),review=get('review'),status=get('status');
  const apply=get('apply'),list=get('differences'),original=get('original');
@@ -28,19 +28,30 @@ export function setupDesignPanel({slots,commit}){
   return block;
  }
 
- get('copy').addEventListener('click',async()=>{
+ async function copyText(value,label){
   const fallback=get('copy-text');
   fallback.hidden=true;
   try{
-   await navigator.clipboard.writeText(advice);
-   status.textContent='相談開始文をコピーしました。ChatGPTに貼り付けてください。';
+   await navigator.clipboard.writeText(value);
+   status.textContent=label+'をコピーしました。ChatGPTに貼り付けてください。';
   }catch{
-   fallback.value=advice;
+   fallback.value=value;
    fallback.hidden=false;
    fallback.focus();
    fallback.select();
-   status.textContent='選択した相談開始文を手動でコピーしてください。';
+   status.textContent='選択した'+label+'を手動でコピーしてください。';
   }
+ }
+ get('copy').addEventListener('click',()=>copyText(advice,'相談開始文'));
+ get('copy-current').addEventListener('click',()=>{
+  get('copy-text').hidden=true;
+  if(!project)return;
+  if(!canCopySaved()){
+   status.textContent='保存が完了してから、もう一度コピーしてください。';
+   return;
+  }
+  try{copyText(serializeDesignSheet(project,slotIds),'現在の設計シート');}
+  catch(error){status.textContent='設計シートをコピーできません。'+error.message;}
  });
  input.addEventListener('input',()=>{resetReview();status.textContent='';});
  get('cancel').addEventListener('click',()=>{

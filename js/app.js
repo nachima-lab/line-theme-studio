@@ -39,7 +39,7 @@ const openStage=setupWorkflowTabs();
 const extraPreviews=setupExtraPreviews();
 const renderSales=setupSalesPanel({save:sales=>updateProject({sales})});
 const renderProduction=setupProductionPanel({save:production=>updateProject({production}),setImage});
-const renderDesign=setupDesignPanel({slots:IMAGE_SLOTS,commit:commitDesign});
+const renderDesign=setupDesignPanel({slots:IMAGE_SLOTS,commit:commitDesign,canCopySaved:()=>!dirty&&!busy});
 const initPartButtons=setupPartPanel({slots:IMAGE_SLOTS,activeProject,commit:commitDesign});
 const productionList=setupProductionList({openStage,selectColorSource:renderProduction.selectColorSource,toggleRedo});
 setupPreviewTabs(productionList.selectPreview);

@@ -41,9 +41,10 @@
  <p>相談開始文をコピーしてChatGPTに貼り付け、企画が決まったら回答の設計シートを下に貼り付けます。</p>
  <div class="production-controls">
   <button type="button" id="design-copy">相談開始文をコピー</button>
+  <button type="button" id="design-copy-current">現在の設計シートをJSONでコピー</button>
   <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く</a>
  </div>
- <textarea id="design-copy-text" aria-label="手動でコピーする相談開始文" readonly hidden></textarea>
+ <textarea id="design-copy-text" aria-label="手動でコピーする内容" readonly hidden></textarea>
  <label for="design-input">ChatGPTから受け取った設計シート</label>
  <textarea id="design-input" rows="5" spellcheck="false" autocapitalize="off"></textarea>
  <button type="button" id="design-preview">取り込む内容を確認</button>

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {parseDesignSheet,designDiff,applyDesignDiff,validateDesign} from '../js/design-sheet.js';
+import {parseDesignSheet,designDiff,applyDesignDiff,validateDesign,serializeDesignSheet} from '../js/design-sheet.js';
 import {IMAGE_SLOTS,createProject} from '../js/store.js';
 
 const ids=IMAGE_SLOTS.map(slot=>slot.id);
@@ -43,4 +43,25 @@ test('選んだ差分だけを反映し、既存画像と原文を保持する',
  assert.equal(patched.production.design.lastImport.raw,second);
  assert.throws(()=>validateDesign({...next.production.design,characters:[]},ids),/定義がありません/);
  assert.deepEqual(validateDesign({characters:[]},ids).characters,[]);
+});
+
+test('保存済みの編集内容から取り込み互換のJSONを作る',()=>{
+ const original=parseDesignSheet(raw,ids);
+ const rows=designDiff(project,original,IMAGE_SLOTS);
+ const saved=applyDesignDiff(project,rows,new Set(rows.map(row=>row.key)),raw,ids);
+ saved.name='保存後の作品名';
+ saved.production.style='保存後の画風';
+ saved.production.design.notes='保存後の補足';
+ saved.production.design.parts.mainImage.composition='保存後の構図';
+ saved.production.design.redo=['mainImage'];
+ const json=serializeDesignSheet(saved,ids);
+ assert.deepEqual(parseDesignSheet(json,ids),{
+  workName:'保存後の作品名',worldview:'',style:'保存後の画風',colors:['#1122AA'],
+  characters:original.characters,motifs:[],notes:'保存後の補足',
+  parts:{mainImage:{composition:'保存後の構図',characterIds:['bird']}}
+ });
+ assert.deepEqual(designDiff(saved,parseDesignSheet(json,ids),IMAGE_SLOTS),[]);
+ assert.doesNotMatch(json,/lastImport|redo|characterSheet/);
+ assert.equal(JSON.parse(serializeDesignSheet(createProject('設計なし'),ids)).sheetVersion,1);
+ assert.throws(()=>serializeDesignSheet({...saved,name:'長'.repeat(121)},ids),/workName/);
 });

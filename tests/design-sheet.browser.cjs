@@ -72,6 +72,36 @@ test('設計取り込みの差分・競合・原文・v5復元と画像無変更
   await find('design-save').click();
   await wait(page,'design-edit-status','設計情報を保存しました');
   assert.deepEqual(await page.evaluate(()=>window.imageWrites),[]);
+  await page.evaluate(()=>{
+   window.copyWrites=[];
+   for(const method of ['put','add','delete','clear']){
+    const original=IDBObjectStore.prototype[method];
+    IDBObjectStore.prototype[method]=function(...args){
+     window.copyWrites.push(this.name);
+     return original.apply(this,args);
+    };
+   }
+  });
+  await find('design-notes').fill('まだ保存していない補足');
+  await find('design-copy-current').click();
+  await wait(page,'design-status','現在の設計シートをコピーしました');
+  const copied=await page.evaluate(()=>navigator.clipboard.readText());
+  const json=JSON.parse(copied);
+  assert.equal(json.sheetVersion,1);
+  assert.equal(json.worldview,'確認後の手入力');
+  assert.equal(json.notes,'手動で更新した補足');
+  assert.equal(json.parts.mainImage.composition,'中央');
+  assert.equal(json.characters[0].id,'bird');
+  assert.deepEqual(json.colors,['#AABBCC']);
+  await find('design-input').fill(copied);
+  await find('design-preview').click();
+  await wait(page,'design-status','反映する差分はありません');
+  await page.evaluate(()=>{navigator.clipboard.writeText=async()=>{throw new DOMException('Denied','NotAllowedError');};});
+  await find('design-copy-current').click();
+  await wait(page,'design-status','手動でコピー');
+  assert.equal(await find('design-copy-text').inputValue(),copied);
+  assert.deepEqual(await page.evaluate(()=>window.copyWrites),[]);
+  assert.match(await find('progress-images').textContent(),/1\/25/);
   const event=page.waitForEvent('download');
   await find('export-backup').click();
   const path=await (await event).path();
